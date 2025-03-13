@@ -7,7 +7,7 @@ import java.util.List;
 
 public class Epic extends Task {
 
-    private final List<Integer> childSubTasks = new ArrayList<>();
+    private final List<SubTask> childSubTasks = new ArrayList<>();
 
     public Epic(String epicName, String epicDescription) {
         super(epicName, epicDescription, States.NEW);
@@ -17,13 +17,12 @@ public class Epic extends Task {
         super(epicId, epicName, epicDescription, epicState);
     }
 
-    public List<Integer> getChildSubTasks() {
+    public List<SubTask> getChildSubTasks() {
         return childSubTasks;
     }
 
-    public void removeSubtaskFromEpic(int subTaskId) {
-        //нужно удалить по Object (IdSubTask), а не по index
-        childSubTasks.remove(Integer.valueOf(subTaskId));
+    public void removeSubtaskFromEpic(SubTask subTask) {
+        childSubTasks.remove(subTask);
     }
 
     @Override
@@ -32,15 +31,15 @@ public class Epic extends Task {
         if (taskDescription != null) {
             tmpDescription = taskDescription;
         }
-        String epicString = " Tasks.Epic{" + "Id=" + taskId + ", Name='" + taskName + '\'' + ", Description='" + tmpDescription + '\'' + ", State='" + taskState.name() + '\'';
+        String epicString = " Epic{" + "Id=" + taskId + ", Name='" + taskName + '\'' + ", Description='" + tmpDescription + '\'' + ", State='" + taskState.name() + '\'';
         if (getChildSubTasks().size() == 0) {
             epicString = epicString + ", childSubTasks.Size = 0 }";
         } else {
-            epicString = epicString + ", childSubTasks{";
-            for (Integer subTaskId : getChildSubTasks()) {
-                epicString = epicString + " " + subTaskId;
+            epicString = epicString + ", SubTaskList[";
+            for (SubTask subTask : getChildSubTasks()) {
+                epicString = epicString + " " + subTask.toString();
             }
-            epicString = epicString + "}";
+            epicString = epicString + "]";
 
         }
         return epicString;

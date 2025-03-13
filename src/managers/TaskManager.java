@@ -48,7 +48,7 @@ public class TaskManager {
         //при этом считаем, что subTaskId никогда при изменении не меняется.
         removeSubTaskFromEpicIfNeed(subTask);
         Epic epic = epicList.get(subTask.getParentEpic());
-        epic.getChildSubTasks().add(subTask.getTaskId());
+        epic.getChildSubTasks().add(subTask);
         subTaskList.put(subTask.getTaskId(), subTask);
         setState(epic);
         return true;
@@ -61,7 +61,7 @@ public class TaskManager {
     public void deleteSubTaskById(int subTaskId) {
         SubTask subTask = subTaskList.get(subTaskId);
         Epic epic = epicList.get(subTask.getParentEpic());
-        epic.removeSubtaskFromEpic(subTaskId);
+        epic.removeSubtaskFromEpic(subTask);
         subTaskList.remove(subTaskId);
         setState(epic);
     }
@@ -114,11 +114,7 @@ public class TaskManager {
 
     //получение списка подзадач определенного Эпика
     public List<SubTask> getAllSubTaskForEpic(Epic epic) {
-        List<SubTask> epicSubTasks = new ArrayList<>();
-        for (Integer subTaskId : epic.getChildSubTasks()) {
-            epicSubTasks.add(subTaskList.get(subTaskId));
-        }
-        return epicSubTasks;
+        return epic.getChildSubTasks();
     }
 
     private void setIdToTask(Task task) {
@@ -162,15 +158,15 @@ public class TaskManager {
         }
         if (oldSubTask.getParentEpic() != newSubTask.getParentEpic()) {
             Epic epic = epicList.get(oldSubTask.getParentEpic());
-            epic.getChildSubTasks().remove(oldSubTask.getTaskId());
+            epic.getChildSubTasks().remove(oldSubTask);
             setState(epic);
         }
     }
 
     private void clearSubTaskListForEpic(int epicId) {
         Epic epic = epicList.get(epicId);
-        for (Integer subTaskId : epic.getChildSubTasks()) {
-            subTaskList.remove(subTaskId);
+        for (SubTask subTask : epic.getChildSubTasks()) {
+            subTaskList.remove(subTask.getTaskId());
         }
         //удалить все его подзадачи из списка дочерних подзадач
         epic.getChildSubTasks().clear();

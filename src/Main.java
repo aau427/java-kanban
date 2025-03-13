@@ -1,4 +1,6 @@
 import managers.TaskManager;
+import model.Epic;
+import model.SubTask;
 import model.Task;
 import referencebook.States;
 
@@ -20,8 +22,17 @@ public class Main {
         System.out.println(tm.getTaskById(3));
         tm.deleteAllTasks();
         System.out.println(tm.getTaskList());
-        //не, так не дело.... нужно тесты писать...
-
-
+        Epic epic1 = new Epic("БКП", "Большой кредитный процесс");
+        tm.createOrUpdateEpic(epic1);
+        System.out.println(epic1);
+        Epic epic2 = new Epic("ЦОД", "");
+        tm.createOrUpdateEpic(epic2);
+        System.out.println(tm.getEpicList());
+        SubTask subTask1 = new SubTask("Интеграции", "реализовать интеграции",
+                States.NEW, epic1);
+        tm.createOrUpdateSubTask(subTask1);
+        System.out.println(subTask1);
+        System.out.println(subTask1);
+        System.out.println(epic1);
     }
 }

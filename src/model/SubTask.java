@@ -3,20 +3,20 @@ package model;
 import referencebook.States;
 
 public class SubTask extends Task {
-    private int parentEpic; //
+    private Epic parentEpic; //
 
-    public SubTask(String subTaskName, String subTaskDescription, States subTaskState, int parentEpic) {
+    public SubTask(String subTaskName, String subTaskDescription, States subTaskState, Epic parentEpic) {
         super(subTaskName, subTaskDescription, subTaskState);
         this.parentEpic = parentEpic;
     }
 
-    public SubTask(int subTaskId, String subTaskName, String subTaskDescription, States subTaskState, int parentEpic) {
+    public SubTask(int subTaskId, String subTaskName, String subTaskDescription, States subTaskState, Epic parentEpic) {
         super(subTaskId, subTaskName, subTaskDescription, subTaskState);
         this.parentEpic = parentEpic;
     }
 
     public int getParentEpic() {
-        return parentEpic;
+        return parentEpic.taskId;
     }
 
     @Override
@@ -25,9 +25,9 @@ public class SubTask extends Task {
         if (taskDescription != null) {
             tmpDescription = taskDescription;
         }
-        return " SubTasks{Id = " + taskId + ", Name='" + taskName + '\''
+        return " SubTask{Id = " + taskId + ", Name='" + taskName + '\''
                 + ", Description = '" + tmpDescription + '\'' + ", State='" + taskState.name() + '\''
-                + ", Epic = " + parentEpic + "}";
+                + ", Epic = " + parentEpic.getTaskId() + "}";
     }
 }
 
