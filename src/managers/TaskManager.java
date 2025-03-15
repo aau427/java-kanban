@@ -13,6 +13,7 @@ public class TaskManager {
     private final HashMap<Integer, Task> taskList = new HashMap<>();
     private final HashMap<Integer, Epic> epicList = new HashMap<>();
     private final HashMap<Integer, SubTask> subTaskList = new HashMap<>();
+    private Integer currentId = 0;
 
     public boolean createOrUpdateTask(Task task) {
         setIdToTask(task);
@@ -122,7 +123,7 @@ public class TaskManager {
 
     private void setIdToTask(Task task) {
         if (task.getId() == null) {
-            task.setId(IdManager.getNextId());
+            task.setId(getNextId());
         }
     }
 
@@ -177,6 +178,10 @@ public class TaskManager {
 
     private void deleteSubTaskList() {
         subTaskList.clear();
+    }
+
+    private int getNextId() {
+        return ++currentId;
     }
 
 }
