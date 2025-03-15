@@ -3,31 +3,31 @@ package model;
 import referencebook.States;
 
 public class SubTask extends Task {
-    private Epic parentEpic; //
+    private int parentEpic;
 
-    public SubTask(String subTaskName, String subTaskDescription, States subTaskState, Epic parentEpic) {
-        super(subTaskName, subTaskDescription, subTaskState);
+    public SubTask(String name, String description, States state, int parentEpic) {
+        super(name, description, state);
         this.parentEpic = parentEpic;
     }
 
-    public SubTask(int subTaskId, String subTaskName, String subTaskDescription, States subTaskState, Epic parentEpic) {
-        super(subTaskId, subTaskName, subTaskDescription, subTaskState);
+    public SubTask(int id, String name, String description, States state, int parentEpic) {
+        super(id, name, description, state);
         this.parentEpic = parentEpic;
     }
 
     public int getParentEpic() {
-        return parentEpic.taskId;
+        return parentEpic;
     }
 
     @Override
     public String toString() {
-        String tmpDescription = "Don't set";
-        if (taskDescription != null) {
-            tmpDescription = taskDescription;
+        String tmpDescription = "Не указан!";
+        if (description != null) {
+            tmpDescription = description;
         }
-        return " SubTask{Id = " + taskId + ", Name='" + taskName + '\''
-                + ", Description = '" + tmpDescription + '\'' + ", State='" + taskState.name() + '\''
-                + ", Epic = " + parentEpic.getTaskId() + "}";
+        return " SubTask{Id = " + id + ", Name='" + name + '\''
+                + ", Description = '" + tmpDescription + '\'' + ", State='" + state + '\''
+                + ", Epic = " + parentEpic + "}";
     }
 }
 

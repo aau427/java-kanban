@@ -5,58 +5,52 @@ import referencebook.States;
 import java.util.Objects;
 
 public class Task {
-    protected Integer taskId;
-    protected String taskName;
-    protected String taskDescription;
-    protected States taskState;
+    protected Integer id;
+    protected String name;
+    protected String description;
+    protected States state;
 
 
-    public Task(String taskName, String taskDescription, States taskState) {
-        this.taskId = null;
-        this.taskName = taskName;
-        this.taskDescription = taskDescription;
-        this.taskState = taskState;
+    public Task(String name, String description, States state) {
+        this.id = null;
+        this.name = name;
+        this.description = description;
+        this.state = state;
     }
 
-    public Task(int taskId, String taskName, String taskDescription, States taskState) {
-        this.taskId = taskId;
-        this.taskName = taskName;
-        this.taskDescription = taskDescription;
-        this.taskState = taskState;
+    public Task(int id, String name, String description, States state) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.state = state;
     }
 
-    public String getTaskName() {
-        return taskName;
+    public String getName() {
+        return name;
     }
 
-    public String getTaskDescription() {
-        return taskDescription;
+    public String getDescription() {
+        return description;
     }
 
-    public Integer getTaskId() {
-        return taskId;
+    public Integer getId() {
+        return id;
     }
 
-    public States getTaskState() {
-        return taskState;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
-    public void setTaskId(Integer taskId) {
-        this.taskId = taskId;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public void setTaskName(String taskName) {
-        this.taskName = taskName;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public void setTaskDescription(String taskDescription) {
-        this.taskDescription = taskDescription;
-    }
-
-    public boolean checkTask() {
-        if (taskName == null) {
-            return false;
-        } else return taskId != null;
+    public boolean isValid() {
+        return name != null && id != null;
     }
 
     @Override
@@ -64,32 +58,32 @@ public class Task {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Task task = (Task) o;
-        return Objects.equals(taskId, task.taskId);
+        return Objects.equals(id, task.id);
     }
 
     @Override
     public int hashCode() {
-        return taskId;
+        return id;
     }
 
     @Override
     public String toString() {
-        String tmpDescription = "Не указали!";
-        if (taskDescription != null) {
-            tmpDescription = taskDescription;
+        String tmpDescription = "Не указан!";
+        if (description != null) {
+            tmpDescription = description;
         }
-        return " Tasks.Task{" + "Id=" + taskId + ", Name='" + taskName + '\''
-                + ", Description='" + tmpDescription + '\'' + ", State='" + taskState.name() + '\''
+        return " Task{" + "Id=" + id + ", Name='" + name + '\''
+                + ", Description='" + tmpDescription + '\'' + ", State='" + state.name() + '\''
                 + '}';
     }
 
-    public void setState(States taskState) {
-        this.taskState = taskState;
+    public void setState(States state) {
+        this.state = state;
     }
 
 
     public States getState() {
-        return taskState;
+        return state;
     }
 }
 

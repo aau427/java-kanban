@@ -7,39 +7,36 @@ import java.util.List;
 
 public class Epic extends Task {
 
-    private final List<SubTask> childSubTasks = new ArrayList<>();
+    private final List<Integer> childSubTasks = new ArrayList<>();
 
     public Epic(String epicName, String epicDescription) {
         super(epicName, epicDescription, States.NEW);
     }
 
-    public Epic(int epicId, String epicName, String epicDescription, States epicState) {
-        super(epicId, epicName, epicDescription, epicState);
-    }
-
-    public List<SubTask> getChildSubTasks() {
+    public List<Integer> getChildSubTasks() {
         return childSubTasks;
     }
 
-    public void removeSubtaskFromEpic(SubTask subTask) {
-        childSubTasks.remove(subTask);
+    public void removeSubtaskFromEpic(int subTaskId) {
+        //нужно удалить по Object (IdSubTask), а не по index
+        childSubTasks.remove(Integer.valueOf(subTaskId));
     }
 
     @Override
     public String toString() {
-        String tmpDescription = "Don't set";
-        if (taskDescription != null) {
-            tmpDescription = taskDescription;
+        String tmpDescription = "Не указан!";
+        if (description != null) {
+            tmpDescription = description;
         }
-        String epicString = " Epic{" + "Id=" + taskId + ", Name='" + taskName + '\'' + ", Description='" + tmpDescription + '\'' + ", State='" + taskState.name() + '\'';
+        String epicString = " Epic{" + "Id=" + id + ", Name='" + name + '\'' + ", Description='" + tmpDescription + '\'' + ", State='" + state + '\'';
         if (getChildSubTasks().size() == 0) {
             epicString = epicString + ", childSubTasks.Size = 0 }";
         } else {
-            epicString = epicString + ", SubTaskList[";
-            for (SubTask subTask : getChildSubTasks()) {
-                epicString = epicString + " " + subTask.toString();
+            epicString = epicString + ", childSubTasks{";
+            for (Integer subTaskId : getChildSubTasks()) {
+                epicString = epicString + " " + subTaskId;
             }
-            epicString = epicString + "]";
+            epicString = epicString + "}";
 
         }
         return epicString;

@@ -16,20 +16,20 @@ public class TaskManager {
 
     public boolean createOrUpdateTask(Task task) {
         setIdToTask(task);
-        if (!task.checkTask()) {
+        if (!task.isValid()) {
             return false;
         }
-        taskList.put(task.getTaskId(), task);
+        taskList.put(task.getId(), task);
         return true;
     }
 
     public boolean createOrUpdateEpic(Epic epic) {
         setIdToTask(epic);
-        if (!epic.checkTask()) {
+        if (!epic.isValid()) {
             return false;
         }
         setState(epic);
-        epicList.put(epic.getTaskId(), epic);
+        epicList.put(epic.getId(), epic);
         return true;
     }
 
@@ -40,16 +40,16 @@ public class TaskManager {
             return false;
         }
         setIdToTask(subTask);
-        if (!subTask.checkTask()) {
+        if (!subTask.isValid()) {
             System.out.println("Не могу породить/изменить подзадачу: не прошла базовые проверки!");
             return false;
         }
         //в subTask может поменяться: наименование, комментарий, статус, а также и (!!!!) родительская задача
-        //при этом считаем, что subTaskId никогда при изменении не меняется.
+        //при этом считаем, что Id подзадачи никогда при изменении не меняется.
         removeSubTaskFromEpicIfNeed(subTask);
         Epic epic = epicList.get(subTask.getParentEpic());
-        epic.getChildSubTasks().add(subTask);
-        subTaskList.put(subTask.getTaskId(), subTask);
+        epic.getChildSubTasks().add(subTask.getId());
+        subTaskList.put(subTask.getId(), subTask);
         setState(epic);
         return true;
     }
@@ -61,7 +61,7 @@ public class TaskManager {
     public void deleteSubTaskById(int subTaskId) {
         SubTask subTask = subTaskList.get(subTaskId);
         Epic epic = epicList.get(subTask.getParentEpic());
-        epic.removeSubtaskFromEpic(subTask);
+        epic.removeSubtaskFromEpic(subTaskId);
         subTaskList.remove(subTaskId);
         setState(epic);
     }
@@ -112,14 +112,17 @@ public class TaskManager {
         return new ArrayList<>(subTaskList.values());
     }
 
-    //получение списка подзадач определенного Эпика
     public List<SubTask> getAllSubTaskForEpic(Epic epic) {
-        return epic.getChildSubTasks();
+        List<SubTask> epicSubTasks = new ArrayList<>();
+        for (Integer subTaskId : epic.getChildSubTasks()) {
+            epicSubTasks.add(subTaskList.get(subTaskId));
+        }
+        return epicSubTasks;
     }
 
     private void setIdToTask(Task task) {
-        if (task.getTaskId() == null) {
-            task.setTaskId(IdManager.getNextId());
+        if (task.getId() == null) {
+            task.setId(IdManager.getNextId());
         }
     }
 
@@ -130,9 +133,9 @@ public class TaskManager {
             boolean isAllSubTasksAreDone = true;
             boolean isAllSubTasksAreNew = true;
             for (SubTask subTask : getAllSubTaskForEpic(epic)) {
-                if (subTask.getTaskState() == States.DONE) {
+                if (subTask.getState() == States.DONE) {
                     isAllSubTasksAreNew = false;
-                } else if (subTask.getTaskState() == States.NEW) {
+                } else if (subTask.getState() == States.NEW) {
                     isAllSubTasksAreDone = false;
                 } else {
                     isAllSubTasksAreNew = false;
@@ -152,21 +155,21 @@ public class TaskManager {
     /* Проверяет, не изменили ли у subTask родителя.
        Если изменили, то удаляет некорректную запись в списке дочерних задач эпика   */
     private void removeSubTaskFromEpicIfNeed(SubTask newSubTask) {
-        SubTask oldSubTask = subTaskList.get(newSubTask.getTaskId());
+        SubTask oldSubTask = subTaskList.get(newSubTask.getId());
         if (oldSubTask == null) {
             return;
         }
         if (oldSubTask.getParentEpic() != newSubTask.getParentEpic()) {
             Epic epic = epicList.get(oldSubTask.getParentEpic());
-            epic.getChildSubTasks().remove(oldSubTask);
+            epic.getChildSubTasks().remove(oldSubTask.getId());
             setState(epic);
         }
     }
 
     private void clearSubTaskListForEpic(int epicId) {
         Epic epic = epicList.get(epicId);
-        for (SubTask subTask : epic.getChildSubTasks()) {
-            subTaskList.remove(subTask.getTaskId());
+        for (Integer subTaskId : epic.getChildSubTasks()) {
+            subTaskList.remove(subTaskId);
         }
         //удалить все его подзадачи из списка дочерних подзадач
         epic.getChildSubTasks().clear();
