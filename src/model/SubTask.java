@@ -10,13 +10,12 @@ public class SubTask extends Task {
         this.parentEpic = parentEpic;
     }
 
-    public SubTask(int id, String name, String description, States state, int parentEpic) {
-        super(id, name, description, state);
-        this.parentEpic = parentEpic;
-    }
-
     public int getParentEpic() {
         return parentEpic;
+    }
+
+    public void setParentEpic(int parentEpic) {
+        this.parentEpic = parentEpic;
     }
 
     @Override

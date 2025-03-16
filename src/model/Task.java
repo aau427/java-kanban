@@ -18,13 +18,6 @@ public class Task {
         this.state = state;
     }
 
-    public Task(int id, String name, String description, States state) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.state = state;
-    }
-
     public String getName() {
         return name;
     }
@@ -50,7 +43,7 @@ public class Task {
     }
 
     public boolean isValid() {
-        return name != null && id != null;
+        return name != null && description != null;
     }
 
     @Override

@@ -17,11 +17,6 @@ public class Epic extends Task {
         return childSubTasks;
     }
 
-    public void removeSubtaskFromEpic(int subTaskId) {
-        //нужно удалить по Object (IdSubTask), а не по index
-        childSubTasks.remove(Integer.valueOf(subTaskId));
-    }
-
     @Override
     public String toString() {
         String tmpDescription = "Не указан!";
@@ -29,7 +24,7 @@ public class Epic extends Task {
             tmpDescription = description;
         }
         String epicString = " Epic{" + "Id=" + id + ", Name='" + name + '\'' + ", Description='" + tmpDescription + '\'' + ", State='" + state + '\'';
-        if (getChildSubTasks().size() == 0) {
+        if (getChildSubTasks().isEmpty()) {
             epicString = epicString + ", childSubTasks.Size = 0 }";
         } else {
             epicString = epicString + ", childSubTasks{";
