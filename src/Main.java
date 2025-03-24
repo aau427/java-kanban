@@ -1,3 +1,5 @@
+import managers.InMemoryTaskManager;
+import managers.Managers;
 import managers.TaskManager;
 import model.Epic;
 import model.SubTask;
@@ -8,7 +10,7 @@ public class Main {
     static int numErrors = 0;
 
     public static void main(String[] args) {
-        TaskManager taskManager = new TaskManager();
+        TaskManager taskManager = Managers.getDefault();
         Task task1 = new Task("Задача 1", "Коммент к задаче 1", States.NEW);
         Task task2 = new Task("Задача 2", "Коммент к задаче 2", States.NEW);
 
