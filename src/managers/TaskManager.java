@@ -32,6 +32,8 @@ public interface TaskManager {
 
     void deleteAllSubTasks();
 
+    List<Task> getHistory();
+
     Task getTaskById(int taskId);
 
     Epic getEpicById(int epicId);

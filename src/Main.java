@@ -1,4 +1,3 @@
-import managers.InMemoryTaskManager;
 import managers.Managers;
 import managers.TaskManager;
 import model.Epic;
@@ -10,19 +9,47 @@ public class Main {
     static int numErrors = 0;
 
     public static void main(String[] args) {
-        TaskManager taskManager = Managers.getDefault();
+        TaskManager taskManager = Managers.getDefaultTaskManager();
+        //тесты спринту 5
+        Task task11 = new Task("Задача 11", "Коммент к задаче 11", States.NEW);
+        Task task12 = new Task("Задача 12", "Коммент к задаче 12", States.DONE);
+        taskManager.createTask(task11);
+        taskManager.createTask(task12);
+
+        Epic epic11 = new Epic("Эпик11", "Комментарий к эпик 11");
+        Epic epic12 = new Epic("Эпик12", "Комментарий к эпик 12");
+        taskManager.createEpic(epic11);
+        taskManager.createEpic(epic12);
+
+        SubTask subTask11 = new SubTask("Подзадача 11", "Коммент", States.IN_PROGRESS, epic11.getId());
+        taskManager.createSubTask(subTask11);
+
+        task11 = taskManager.getTaskById(task11.getId());
+        task12 = taskManager.getTaskById(task12.getId());
+        epic11 = taskManager.getEpicById(epic11.getId());
+        subTask11 = taskManager.getSubTaskById(subTask11.getId());
+        printAll(taskManager);
+
+        taskManager.deleteAllTasks();
+        taskManager.deleteAllSubTasks();
+        taskManager.deleteAllEpics();
+
+        //тесты спринт 4
+
+
         Task task1 = new Task("Задача 1", "Коммент к задаче 1", States.NEW);
         Task task2 = new Task("Задача 2", "Коммент к задаче 2", States.NEW);
 
         taskManager.createTask(task1);
         taskManager.createTask(task2);
-        if (taskManager.getTaskList().size() != 2) {
-            System.out.println("Ошибка! количество созданных задач <>2");
-            numErrors++;
-        }
 
-        Epic epic1 = new Epic("Эпик1", "Комментарий к эпик 1"); //3
-        Epic epic2 = new Epic("Эпик2", "Пустой эпик"); //4
+        Task task3 = taskManager.getTaskById(task1.getId());
+        System.out.println("Печатаю историю, т.к. посмотрели Задачу 1");
+        System.out.println(taskManager.getHistory());
+
+
+        Epic epic1 = new Epic("Эпик1", "Комментарий к эпик 1");
+        Epic epic2 = new Epic("Эпик2", "Пустой эпик");
 
         taskManager.createEpic(epic1);
         taskManager.createEpic(epic2);
@@ -35,9 +62,9 @@ public class Main {
         SubTask subTask2 = new SubTask("Подзадача2", "Комментарий к подзадаче 2", States.NEW, epic1.getId());
         SubTask subTask3 = new SubTask("Подзадача3", "Комментарий к подзадаче 3", States.IN_PROGRESS, epic1.getId());
 
-        taskManager.createSubTask(subTask1);//5
-        taskManager.createSubTask(subTask2);//6
-        taskManager.createSubTask(subTask3);//7
+        taskManager.createSubTask(subTask1);
+        taskManager.createSubTask(subTask2);
+        taskManager.createSubTask(subTask3);
         if (taskManager.getSubTaskList().size() != 3) {
             System.out.println("Ошибка! количество созданных подзадач <> 3");
         }
@@ -215,5 +242,16 @@ public class Main {
         SubTask newSubTask = new SubTask(subTask.getName(), subTask.getDescription(), subTask.getState(), subTask.getParentEpic());
         newSubTask.setId(subTask.getId());
         return newSubTask;
+    }
+
+    private static void printAll(TaskManager taskManager) {
+        System.out.println("список задач");
+        System.out.println(taskManager.getTaskList());
+        System.out.println("Список эпиков");
+        System.out.println(taskManager.getEpicList());
+        System.out.println("Список подзадач");
+        System.out.println(taskManager.getSubTaskList());
+        System.out.println("История просмотра без одного Эпика 12");
+        System.out.println(taskManager.getHistory());
     }
 }

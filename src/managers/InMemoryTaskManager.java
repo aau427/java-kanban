@@ -14,7 +14,7 @@ public class InMemoryTaskManager implements TaskManager {
     private final HashMap<Integer, Epic> epicList = new HashMap<>();
     private final HashMap<Integer, SubTask> subTaskList = new HashMap<>();
     private Integer currentId = 0;
-
+    private final HistoryManager historyManager = Managers.getDefaultHistory();
     @Override
     public boolean createTask(Task task) {
         if (task.getId() != null) {
@@ -91,7 +91,9 @@ public class InMemoryTaskManager implements TaskManager {
             return false;
         }
         int parentEpicId = subTask.getParentEpic();
-        Epic epic = getEpicById(parentEpicId);
+        /*Судя по ТЗ в историю пишем, если кто-то "смотрит" эпик
+         Нам здесь не нужно записывать в историю, т.к. это чисто техническое получение Епика*/
+        Epic epic = getEpicByIdWithoutHistory(parentEpicId);
         if (epic == null) {
             System.out.println("Не могу породить/изменить подзадачу! Не нашел родительский Эпик № " + parentEpicId);
             return false;
@@ -119,7 +121,8 @@ public class InMemoryTaskManager implements TaskManager {
             return false;
         }
         int parentEpicId = subTask.getParentEpic();
-        Epic epic = getEpicById(parentEpicId);
+        //не нужно писать в историю, никто не смотрит на Эпик извне, это чисто техническое получение Эпика
+        Epic epic = getEpicByIdWithoutHistory(parentEpicId);
         if (epic == null) {
             System.out.println(String.format("Не могу породить/изменить подзадачу! Не нашел ee Эпик № %d ", parentEpicId));
             return false;
@@ -183,18 +186,35 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
+    public List<Task> getHistory() {
+        return historyManager.getHistoryList();
+    }
+
+    @Override
     public Task getTaskById(int taskId) {
-        return taskList.get(taskId);
+         Task task = taskList.get(taskId);
+         if(task != null) {
+             historyManager.addTask(task);
+         }
+        return task;
     }
 
     @Override
     public Epic getEpicById(int epicId) {
-        return epicList.get(epicId);
+        Epic epic = epicList.get(epicId);
+        if(epic != null) {
+            historyManager.addTask(epic);
+        }
+        return epic;
     }
 
     @Override
     public SubTask getSubTaskById(int subTaskId) {
-        return subTaskList.get(subTaskId);
+        SubTask subTask = subTaskList.get(subTaskId);
+        if(subTask != null) {
+            historyManager.addTask(subTask);
+        }
+        return subTask;
     }
 
     @Override
@@ -266,6 +286,11 @@ public class InMemoryTaskManager implements TaskManager {
 
     private int getNextId() {
         return ++currentId;
+    }
+
+    private Epic getEpicByIdWithoutHistory(int epicId) {
+        return epicList.get(epicId);
+
     }
 
 }
