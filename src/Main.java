@@ -6,7 +6,7 @@ import model.Task;
 import referencebook.States;
 
 public class Main {
-    static int numErrors = 0;
+    private static int numErrors = 0;
 
     public static void main(String[] args) {
         TaskManager taskManager = Managers.getDefaultTaskManager();

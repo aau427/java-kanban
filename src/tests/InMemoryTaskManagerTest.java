@@ -4,8 +4,7 @@ import managers.*;
 import model.Epic;
 import model.SubTask;
 import model.Task;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import referencebook.States;
@@ -16,16 +15,9 @@ class InMemoryTaskManagerTest {
 
     private static TaskManager taskManager;
 
-    @BeforeAll
-    public static void beforeAll() {
+    @BeforeEach
+    public void beforeEach() {
         taskManager = Managers.getDefaultTaskManager();
-    }
-
-    @AfterEach
-    public void afterEach() {
-        taskManager.deleteAllTasks();
-        taskManager.deleteAllSubTasks();
-        taskManager.deleteAllEpics();
     }
 
     @DisplayName("Экземпляры Task равны друг другу, если равен их Id")

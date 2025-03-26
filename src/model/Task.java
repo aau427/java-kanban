@@ -10,6 +10,13 @@ public class Task {
     protected String description;
     protected States state;
 
+    public Task(int id, String name, String description, States state) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.state = state;
+    }
+
 
     public Task(String name, String description, States state) {
         this.id = null;
