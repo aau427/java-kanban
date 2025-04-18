@@ -159,7 +159,7 @@ class InMemoryTaskManagerTest {
 
     @DisplayName("Задача с заданным ID и сгенерированным ID не конфликтуют внутри менеджера")
     @Test
-    public void ShouldTasksWithSetIdAndGeneratedIdWillNotConflict() {
+    public void shouldTasksWithSetIdAndGeneratedIdWillNotConflict() {
         Task task1 = createOneTask();
         int task1Id = taskManager.createTask(task1);
 
@@ -201,8 +201,8 @@ class InMemoryTaskManagerTest {
         SubTask subTask = createOneSubtask(epicId);
         int subTaskId = taskManager.createSubTask(subTask);
 
-        SubTask updateSubTask = new SubTask(subTaskId, subTask.getName(), subTask.getDescription()
-                , States.DONE, subTask.getParentEpic());
+        SubTask updateSubTask = new SubTask(subTaskId, subTask.getName(), subTask.getDescription(),
+                States.DONE, subTask.getParentEpic());
         taskManager.updateSubTask(updateSubTask);
 
         Epic epic1 = taskManager.getEpicById(epicId);
