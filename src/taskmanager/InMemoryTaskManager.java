@@ -104,8 +104,8 @@ public class InMemoryTaskManager implements TaskManager {
             return -1;
         }
         int subTaskId = getNextId();
-        SubTask subTaskToInsert = new SubTask(subTaskId, subTask.getName(), subTask.getDescription()
-                , subTask.getState(), subTask.getParentEpic());
+        SubTask subTaskToInsert = new SubTask(subTaskId, subTask.getName(), subTask.getDescription(),
+                subTask.getState(), subTask.getParentEpic());
         epic.getChildSubTasks().add(subTaskId);
         subTaskList.put(subTaskId, subTaskToInsert);
         setState(epic);
