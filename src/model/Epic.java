@@ -17,6 +17,19 @@ public class Epic extends Task {
         super(epicName, epicDescription, States.NEW);
     }
 
+    public void setState(States state) {
+        this.state = state;
+    }
+
+    public Epic getEpicCopy() {
+        Epic returnEpic = new Epic(this.getId(), this.getName(), this.getDescription());
+        for (Integer id : this.getChildSubTasks()) {
+            returnEpic.childSubTasks.add(id);
+        }
+        returnEpic.setState(this.getState());
+        return returnEpic;
+    }
+
     public List<Integer> getChildSubTasks() {
         return childSubTasks;
     }

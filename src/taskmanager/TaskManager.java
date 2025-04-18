@@ -7,15 +7,15 @@ import model.Task;
 import java.util.List;
 
 public interface TaskManager {
-    boolean createTask(Task task);
+    int createTask(Task task);
 
     boolean updateTask(Task task);
 
-    boolean createEpic(Epic epic);
+    int createEpic(Epic epic);
 
     boolean updateEpic(Epic epic);
 
-    boolean createSubTask(SubTask subTask);
+    int createSubTask(SubTask subTask);
 
     boolean updateSubTask(SubTask subTask);
 

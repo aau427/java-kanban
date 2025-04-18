@@ -19,10 +19,6 @@ public class SubTask extends Task {
         return parentEpic;
     }
 
-    public void setParentEpic(int parentEpic) {
-        this.parentEpic = parentEpic;
-    }
-
     @Override
     public String toString() {
         String tmpDescription = "Не указан!";

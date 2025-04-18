@@ -26,7 +26,7 @@ class InMemoryHistoryManagerTest {
         historyManager.addTask(task);
 
         Assertions.assertEquals(1, historyManager.getHistoryList().size());
-        Assertions.assertEquals(666, (int) historyManager.getHistoryList().get(0).getId());
+        Assertions.assertEquals(666, (int) historyManager.getHistoryList().getFirst().getId());
     }
 
     @Test
@@ -36,7 +36,7 @@ class InMemoryHistoryManagerTest {
         historyManager.addTask(epic);
 
         Assertions.assertEquals(1, historyManager.getHistoryList().size());
-        Assertions.assertEquals(666, (int) historyManager.getHistoryList().get(0).getId());
+        Assertions.assertEquals(666, (int) historyManager.getHistoryList().getFirst().getId());
     }
 
     @Test
@@ -46,7 +46,7 @@ class InMemoryHistoryManagerTest {
         historyManager.addTask(subTask);
 
         Assertions.assertEquals(1, historyManager.getHistoryList().size());
-        Assertions.assertEquals(666, (int) historyManager.getHistoryList().get(0).getId());
+        Assertions.assertEquals(666, (int) historyManager.getHistoryList().getFirst().getId());
     }
 
     @Test
@@ -60,7 +60,7 @@ class InMemoryHistoryManagerTest {
         historyManager.remove(task1.getId());
 
         Assertions.assertEquals(1, historyManager.getHistoryList().size());
-        Assertions.assertEquals(2, historyManager.getHistoryList().get(0).getId());
+        Assertions.assertEquals(2, historyManager.getHistoryList().getFirst().getId());
     }
 
     @Test
@@ -74,7 +74,7 @@ class InMemoryHistoryManagerTest {
         historyManager.remove(subTask1.getId());
 
         Assertions.assertEquals(1, historyManager.getHistoryList().size());
-        Assertions.assertEquals(2, (int) historyManager.getHistoryList().get(0).getId());
+        Assertions.assertEquals(2, (int) historyManager.getHistoryList().getFirst().getId());
     }
 
     @Test
