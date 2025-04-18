@@ -1,5 +1,7 @@
-package managers;
+package taskmanager;
 
+import common.Managers;
+import history.HistoryManager;
 import model.Epic;
 import model.SubTask;
 import model.Task;
@@ -150,6 +152,11 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void deleteTaskById(int taskId) {
         taskList.remove(taskId);
+        /* в соответствии с новым ТЗ (принт 6)
+            Добавьте вызов метода при удалении задач, чтобы они удалялись также из истории просмотров.
+            относится к задачам, подзадачам и эпикам
+        */
+        historyManager.remove(taskId);
     }
 
     @Override
@@ -159,21 +166,29 @@ public class InMemoryTaskManager implements TaskManager {
         //remove не по Index, а по Object!
         epic.getChildSubTasks().remove(Integer.valueOf(subTaskId));
         setState(epic);
+        historyManager.remove(subTaskId);
     }
 
     @Override
     public void deleteEpicById(int epicId) {
         clearSubTaskListForEpic(epicId);
         epicList.remove(epicId);
+        historyManager.remove(epicId);
     }
 
     @Override
     public void deleteAllTasks() {
+        for(Integer taskId : taskList.keySet()) {
+            historyManager.remove(taskId);
+        }
         taskList.clear();
     }
 
     @Override
     public void deleteAllEpics() {
+        for(Integer epicId : epicList.keySet()) {
+            historyManager.remove(epicId);
+        }
         epicList.clear();
         deleteSubTaskList();
     }
@@ -277,12 +292,16 @@ public class InMemoryTaskManager implements TaskManager {
         Epic epic = epicList.get(epicId);
         for (Integer subTaskId : epic.getChildSubTasks()) {
             subTaskList.remove(subTaskId);
+            historyManager.remove(subTaskId);
         }
         //удалить все его подзадачи из списка дочерних подзадач
         epic.getChildSubTasks().clear();
     }
 
     private void deleteSubTaskList() {
+        for(Integer subTaskId : subTaskList.keySet()) {
+            historyManager.remove(subTaskId);
+        }
         subTaskList.clear();
     }
 

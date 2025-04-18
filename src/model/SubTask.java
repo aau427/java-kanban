@@ -5,6 +5,11 @@ import referencebook.States;
 public class SubTask extends Task {
     private int parentEpic;
 
+    public SubTask(int id, String name, String description, States state, int parentEpic) {
+        super(id, name, description, state);
+        this.parentEpic = parentEpic;
+    }
+
     public SubTask(String name, String description, States state, int parentEpic) {
         super(name, description, state);
         this.parentEpic = parentEpic;

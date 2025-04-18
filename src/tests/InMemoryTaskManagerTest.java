@@ -1,6 +1,10 @@
 package tests;
 
-import managers.*;
+import common.Managers;
+import history.HistoryManager;
+import history.InMemoryHistoryManager;
+import org.junit.jupiter.api.Assertions;
+import taskmanager.*;
 import model.Epic;
 import model.SubTask;
 import model.Task;
@@ -220,6 +224,26 @@ class InMemoryTaskManagerTest {
         boolean isCreate = taskManager.createSubTask(subTask);
         assertFalse(isCreate, "Подзадача с несуществующим эпиком породилась!");
         assertTrue(taskManager.getSubTaskList().isEmpty(), "Подзадача с несуществующим эпиком породилась");
+
+    }
+
+    @DisplayName("Внутри эпика не остается неактуальных подзадач")
+    @Test
+    public void shouldEpicCorrectAfterSubTaskDelete() {
+        Epic epic = createOneEpic();
+        taskManager.createEpic(epic);
+
+        SubTask subTask1 = createOneSubtask(epic.getId());
+        taskManager.createSubTask(subTask1);
+
+        SubTask subTask2 = createOneSubtask(epic.getId());
+        taskManager.createSubTask(subTask2);
+
+        taskManager.deleteSubTaskById(subTask1.getId());
+
+        Assertions.assertEquals(1, epic.getChildSubTasks().size());
+        Assertions.assertNotEquals(2, taskManager.getSubTaskList().get(0).getId());
+
 
     }
 
