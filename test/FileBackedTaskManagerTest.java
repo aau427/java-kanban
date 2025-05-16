@@ -6,6 +6,9 @@ import referencebook.States;
 import taskmanager.FileBackedTaskManager;
 import taskmanager.TaskManager;
 
+import java.io.File;
+import java.io.IOException;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -15,11 +18,18 @@ class FileBackedTaskManagerTest {
     private final static String prefix = "testdata";
     private final static String suffix = "csv";
     private static TaskManager manager;
-    private static final String fileName = System.getProperty("user.home") + "\\" + "test.csv";
+    private static String fileName;
 
 
     @BeforeAll
     public static void beforeAll() {
+        File file = null;
+        try {
+            file = File.createTempFile("test", "csv");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        fileName = file.getName();
         manager = new FileBackedTaskManager(fileName);
     }
 
@@ -83,12 +93,12 @@ class FileBackedTaskManagerTest {
         TaskManager manager1 = new FileBackedTaskManager(fileName);
 
         assertTrue(manager1.getEpicList().size() == 1, "Эпики не загрузились");
-        Assertions.assertEquals(epicId, manager1.getEpicList().getFirst().getId(), "Не тот Эпик загрузился");
-        Assertions.assertTrue(manager1.getSubTaskList().size() == 1, "Подзадачи не загрузились");
-        Assertions.assertEquals(subTaskId, manager1.getSubTaskList().getFirst().getId(), "Не та подзадача загрузилась");
-        Assertions.assertTrue(manager1.getTaskList().size() == 1, "Задачи не загрузились");
-        Assertions.assertEquals(taskId, manager1.getTaskList().getFirst().getId(), "Не та подзадача загрузилась");
-        Assertions.assertTrue(manager1.getHistory().size() == 1, "История не загрузилась");
-        Assertions.assertEquals(epicId, manager1.getHistory().getFirst().getId(), "Не тот эпик в истории");
+        assertEquals(epicId, manager1.getEpicList().getFirst().getId(), "Не тот Эпик загрузился");
+        assertTrue(manager1.getSubTaskList().size() == 1, "Подзадачи не загрузились");
+        assertEquals(subTaskId, manager1.getSubTaskList().getFirst().getId(), "Не та подзадача загрузилась");
+        assertTrue(manager1.getTaskList().size() == 1, "Задачи не загрузились");
+        assertEquals(taskId, manager1.getTaskList().getFirst().getId(), "Не та подзадача загрузилась");
+        assertTrue(manager1.getHistory().size() == 1, "История не загрузилась");
+        assertEquals(epicId, manager1.getHistory().getFirst().getId(), "Не тот эпик в истории");
     }
 }
