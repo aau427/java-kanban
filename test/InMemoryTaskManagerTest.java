@@ -8,18 +8,24 @@ import model.SubTask;
 import model.Task;
 import org.junit.jupiter.api.*;
 import referencebook.States;
+import taskmanager.FileBackedTaskManager;
 import taskmanager.InMemoryTaskManager;
 import taskmanager.TaskManager;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class InMemoryTaskManagerTest {
 
     private TaskManager taskManager;
+    private final String fileName = System.getProperty("user.home") + "\\" + "test.csv";
 
     @BeforeEach
     public void beforeEach() {
-        taskManager = Managers.getDefaultTaskManager();
+        taskManager = new InMemoryTaskManager();
     }
 
     @DisplayName("Managers  возвращает проинициализированный и готовый к работе HistoryManager")
@@ -29,15 +35,6 @@ class InMemoryTaskManagerTest {
 
         assertNotNull(historyManager, "HistoryManager не проинициализирован");
         assertEquals(InMemoryHistoryManager.class, historyManager.getClass(), "Объект не того класса");
-    }
-
-    @DisplayName("Managers  возвращает проинициализированный и готовый к работе TaskManager")
-    @Test
-    public void shouldManagersReturnInitializedTaskManager() {
-        TaskManager taskManager = Managers.getDefaultTaskManager();
-
-        assertNotNull(taskManager, "TaskManager не проинициализирован");
-        assertEquals(InMemoryTaskManager.class, taskManager.getClass(), "Объект не того класса");
     }
 
     @Nested
