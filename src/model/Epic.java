@@ -1,6 +1,7 @@
 package model;
 
 import referencebook.States;
+import referencebook.TaskType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,5 +54,12 @@ public class Epic extends Task {
         }
         return epicString;
     }
+
+    @Override
+    public String toStringForSaveToFile() {
+        //ID, TYPE, NAME, Status, Description
+        return String.format("%d,%s,%s,%s,%s", id, TaskType.EPIC.toString(), name, state.toString(), description);
+    }
+
 
 }

@@ -1,6 +1,7 @@
 package model;
 
 import referencebook.States;
+import referencebook.TaskType;
 
 public class SubTask extends Task {
     private int parentEpic;
@@ -28,6 +29,12 @@ public class SubTask extends Task {
         return " SubTask{Id = " + id + ", Name='" + name + '\''
                 + ", Description = '" + tmpDescription + '\'' + ", State='" + state + '\''
                 + ", Epic = " + parentEpic + "}";
+    }
+
+    @Override
+    public String toStringForSaveToFile() {
+        //ID, TYPE, NAME, Status, Description, Epic
+        return String.format("%d,%s,%s,%s,%s,%d", id, TaskType.SUBTASK, name, state.toString(), description, parentEpic);
     }
 }
 
