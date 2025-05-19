@@ -10,10 +10,7 @@ import referencebook.PositionInFile;
 import referencebook.States;
 import referencebook.TaskType;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -28,6 +25,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public FileBackedTaskManager(final String fileName) {
         this.fileName = fileName;
         load();
+    }
+
+    public static FileBackedTaskManager loadFromFile(File file) {
+        return new FileBackedTaskManager(file.getName());
     }
 
     @Override
@@ -160,7 +161,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     private void writeAllTasks(final FileWriter fileWriter) throws IOException {
         for (Task task : getTaskList()) {
-            String stt = task.toStringForSaveToFile();
             fileWriter.write(task.toStringForSaveToFile() + "\n");
         }
     }
