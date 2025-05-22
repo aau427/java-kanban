@@ -29,8 +29,13 @@ public class InMemoryTaskManager implements TaskManager {
             return -1;
         }
         int taskId = getNextId();
-        taskList.put(taskId, new Task(taskId, task.getName(), task.getDescription(), task.getState()));
+        createTaskCommon(new Task(taskId, task.getName(), task.getDescription(), task.getState()));
         return taskId;
+    }
+
+    public int createTaskCommon(Task task) {
+        taskList.put(task.getId(), task);
+        return task.getId();
     }
 
     @Override
@@ -56,10 +61,13 @@ public class InMemoryTaskManager implements TaskManager {
             return -1;
         }
         int epicId = getNextId();
-        Epic epicToInsert = new Epic(epicId, epic.getName(), epic.getDescription());
-        epicToInsert.setState(States.NEW);
-        epicList.put(epicId, epicToInsert);
-        return epicId;
+        return createEpicCommon(new Epic(epicId, epic.getName(), epic.getDescription()));
+    }
+
+    protected int createEpicCommon(Epic epic) {
+        epic.setState(States.NEW);
+        epicList.put(epic.getId(), epic);
+        return epic.getId();
     }
 
     @Override
@@ -106,10 +114,16 @@ public class InMemoryTaskManager implements TaskManager {
         int subTaskId = getNextId();
         SubTask subTaskToInsert = new SubTask(subTaskId, subTask.getName(), subTask.getDescription(),
                 subTask.getState(), subTask.getParentEpic());
-        epic.getChildSubTasks().add(subTaskId);
-        subTaskList.put(subTaskId, subTaskToInsert);
+        return createSubTaskCommon(subTaskToInsert);
+    }
+
+    public int createSubTaskCommon(SubTask subTask) {
+        Epic epic = getEpicByIdWithoutHistory(subTask.getParentEpic());
+        epic.getChildSubTasks().add(subTask.getId());
+        subTaskList.put(subTask.getId(), subTask);
         setState(epic);
-        return subTaskId;
+        return subTask.getId();
+
     }
 
     @Override
@@ -315,11 +329,26 @@ public class InMemoryTaskManager implements TaskManager {
         return ++currentId;
     }
 
-    private Epic getEpicByIdWithoutHistory(int epicId) {
+    protected void setCurrentId(int id) {
+        currentId = id;
+    }
+
+    protected Epic getEpicByIdWithoutHistory(int epicId) {
         return epicList.get(epicId);
 
     }
 
+    protected Task getTaskByIdWithoutHistory(int taskId) {
+        return taskList.get(taskId);
+    }
+
+    protected SubTask getSubTaskByIdWithoutHistory(int subTaskId) {
+        return subTaskList.get(subTaskId);
+    }
+
+    protected HistoryManager getHistoryManager() {
+        return historyManager;
+    }
 }
 
 
