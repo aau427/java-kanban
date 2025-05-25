@@ -1,4 +1,4 @@
-package taskmanager;
+package managers;
 
 import model.Epic;
 import model.SubTask;
@@ -46,4 +46,6 @@ public interface TaskManager {
     List<SubTask> getSubTaskList();
 
     List<SubTask> getAllSubTaskForEpic(Epic epic);
+
+    List<Task> getPrioritizedTasks();
 }
