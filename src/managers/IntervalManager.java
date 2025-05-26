@@ -1,6 +1,7 @@
 package managers;
 
 import common.Managers;
+import exception.ManagerIntervalException;
 import exception.ManagerSaveException;
 
 import java.time.Duration;
@@ -34,7 +35,7 @@ public class IntervalManager {
 
     public void occupyIntervals(LocalDateTime startTime, LocalDateTime endTime) throws ManagerSaveException {
         if (!canUseInterval(startTime, endTime)) {
-            throw new ManagerSaveException("Интервал времени: [" +
+            throw new ManagerIntervalException("Интервал времени: [" +
                     startTime.format(dateTimeFormatter) + ", " +
                     endTime.format(dateTimeFormatter) + ") занят!");
         }

@@ -144,11 +144,11 @@ public class InMemoryTaskManager implements TaskManager {
         prioritizedTasks.add(subTask);
         subTaskList.put(subTask.getId(), subTask);
         Epic epic = getEpicByIdWithoutHistory(subTask.getParentEpic());
-        calcSomeFieldsForEpic(epic);
+        calcStateAndTimeForEpic(epic);
         return subTask.getId();
     }
 
-    private void calcSomeFieldsForEpic(Epic epic) {
+    private void calcStateAndTimeForEpic(Epic epic) {
         setState(epic);
         epic.setDuration(calcDurationForEpic(epic));
         Optional<LocalDateTime> startDateOptional;
@@ -216,7 +216,7 @@ public class InMemoryTaskManager implements TaskManager {
         Epic epic = epicList.get(subTask.getParentEpic());
         //remove не по Index, а по Object!
         epic.getChildSubTasks().remove(Integer.valueOf(subTaskId));
-        calcSomeFieldsForEpic(epic);
+        calcStateAndTimeForEpic(epic);
     }
 
     @Override
@@ -249,7 +249,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void deleteAllSubTasks() {
         for (Epic epic : epicList.values()) {
             epic.getChildSubTasks().clear();
-            calcSomeFieldsForEpic(epic);
+            calcStateAndTimeForEpic(epic);
         }
         deleteSubTaskList();
     }
@@ -333,16 +333,14 @@ public class InMemoryTaskManager implements TaskManager {
                 } else if (subTask.getState() == States.NEW) {
                     isAllSubTasksAreDone = false;
                 } else {
-                    isAllSubTasksAreNew = false;
-                    isAllSubTasksAreDone = false;
+                    epic.setState(States.IN_PROGRESS);
+                    return;
                 }
             }
             if (isAllSubTasksAreNew) {
                 epic.setState(States.NEW);
             } else if (isAllSubTasksAreDone) {
                 epic.setState(States.DONE);
-            } else {
-                epic.setState(States.IN_PROGRESS);
             }
         }
     }

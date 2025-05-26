@@ -1,5 +1,5 @@
 import common.Managers;
-import exception.ManagerSaveException;
+import exception.ManagerIntervalException;
 import managers.TaskManager;
 import model.Epic;
 import model.SubTask;
@@ -60,7 +60,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
             Task task1 = new Task("Задача №2", "Коммент к задаче 2", States.NEW, startDateTime1,
                     duration1);
 
-            assertThrows(ManagerSaveException.class, () -> {
+            assertThrows(ManagerIntervalException.class, () -> {
                 int task1Id = taskManager.createTask(task1);
             }, "Добавление задачи, если интервал занят, должно приводить к исключению!");
             assertEquals(taskId, task.getId(), "Задача 1 не порождена!");
@@ -76,7 +76,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
             Task task1 = new Task("Задача №2", "Коммент к задаче 2", States.NEW, startDateTime1,
                     duration1);
 
-            assertThrows(ManagerSaveException.class, () -> {
+            assertThrows(ManagerIntervalException.class, () -> {
                 int task1Id = taskManager.createTask(task1);
             }, "Добавление задачи, если интервал занят, должно приводить к исключению!");
             assertEquals(taskId, task.getId(), "Задача 1 не порождена!");
@@ -92,7 +92,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
             Task task1 = new Task("Задача №2", "Коммент к задаче 2", States.NEW, startDateTime1,
                     duration1);
 
-            assertThrows(ManagerSaveException.class, () -> {
+            assertThrows(ManagerIntervalException.class, () -> {
                 int task1Id = taskManager.createTask(task1);
             }, "Добавление задачи, если интервал занят, должно приводить к исключению!");
             assertEquals(taskId, task.getId(), "Задача 1 не порождена!");
