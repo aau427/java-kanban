@@ -6,8 +6,10 @@ public enum PositionInFile {
     NAME(2),
     STATE(3),
     DESCRIPTION(4),
-    EPIC(5);
-    private int position;
+    EPIC(5),
+    STARTTIME(6),
+    DURATION(7);
+    private final int position;
 
     PositionInFile(int position) {
         this.position = position;
