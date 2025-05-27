@@ -884,7 +884,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
             assertEquals(LocalDateTime.of(2025, 1, 1, 0, 0),
                     epic.getStartTimeOptional().get(), "Дата начала Эпика рассчитана некорректно!");
-            assertEquals(LocalDateTime.of(2025, 1, 10, 0, 0),
+            assertEquals(LocalDateTime.of(2025, 1, 21, 0, 0),
                     epic.getEndTimeOptional().get(), "Дата окончания Эпика рассчитана некорректно!");
             assertEquals(Duration.ofDays(13),
                     epic.getDuration(), "продолжительность эпика рассчитана некорректно");
@@ -911,6 +911,23 @@ abstract class TaskManagerTest<T extends TaskManager> {
             assertNull(subTask1, "Подзадача 1 не удалена!");
             assertNull(subTask2, "Подзадача 2 не  удалена ");
             assertEquals(0, taskManager.getSubTaskList().size(), "Подзадачи не удалены");
+        }
+
+        @DisplayName("При удалении подзадачи дата начала, дата окончания и duration эпика рассчитывается корректно")
+        @Test
+        public void shouldTaskManagerСorrectRecalcDatesAndDurationForEpicAfterRemoveSubTask() {
+
+            subTask1 = taskManager.getSubTaskById(subTask1Id);
+            subTask2 = taskManager.getSubTaskById(subTask2Id);
+            taskManager.deleteSubTaskById(subTask1Id);
+            Epic epic = taskManager.getEpicById(subTask2.getParentEpic());
+
+            assertEquals(LocalDateTime.of(2025, 1, 10, 0, 0),
+                    epic.getStartTimeOptional().get(), "Дата начала Эпика рассчитана некорректно!");
+            assertEquals(LocalDateTime.of(2025, 1, 21, 0, 0),
+                    epic.getEndTimeOptional().get(), "Дата окончания Эпика рассчитана некорректно!");
+            assertEquals(Duration.ofDays(11),
+                    epic.getDuration(), "продолжительность эпика рассчитана некорректно");
         }
 
         @DisplayName("TaskManager действительно изменяет подзадачу")
@@ -956,6 +973,33 @@ abstract class TaskManagerTest<T extends TaskManager> {
             assertThrows(ManagerSaveException.class, () -> {
                 taskManager.updateSubTask(subTask1);
             }, "Порождение подзадачи несуществующего Эпика должно приводить к исключению!");
+        }
+
+        @DisplayName("При обновлении подзадачи дата начала, дата окончания и duration эпика рассчитывается корректно")
+        @Test
+        public void shouldTaskManagerСorrectRecalcDatesAndDurationForEpicAfterUpdateSubTask() {
+
+            subTask1 = taskManager.getSubTaskById(subTask1Id);
+            subTask2 = taskManager.getSubTaskById(subTask2Id);
+            subTask1 = new SubTask(subTask1Id, subTask1.getName(), subTask1.getDescription(), subTask1.getState(),
+                    subTask1.getParentEpic(),
+                    LocalDateTime.of(2025, Month.DECEMBER, 1, 0, 0),
+                    Duration.ofDays(5));
+            subTask2 = new SubTask(subTask2Id, subTask2.getName(), subTask2.getDescription(), subTask2.getState(),
+                    subTask2.getParentEpic(),
+                    LocalDateTime.of(2025, Month.APRIL, 15, 0, 0),
+                    Duration.ofDays(14));
+            subTask1Id = taskManager.updateSubTask(subTask1);
+            subTask2Id = taskManager.updateSubTask(subTask2);
+
+            Epic epic = taskManager.getEpicById(subTask2.getParentEpic());
+
+            assertEquals(LocalDateTime.of(2025, Month.APRIL, 15, 0, 0),
+                    epic.getStartTimeOptional().get(), "Дата начала Эпика рассчитана некорректно!");
+            assertEquals(LocalDateTime.of(2025, Month.DECEMBER, 6, 0, 0),
+                    epic.getEndTimeOptional().get(), "Дата окончания Эпика рассчитана некорректно!");
+            assertEquals(Duration.ofDays(19),
+                    epic.getDuration(), "продолжительность эпика рассчитана некорректно");
         }
 
         @DisplayName("Проверка истории")
