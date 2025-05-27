@@ -9,15 +9,15 @@ import java.util.List;
 public interface TaskManager {
     int createTask(Task task);
 
-    boolean updateTask(Task task);
+    int updateTask(Task task);
 
     int createEpic(Epic epic);
 
-    boolean updateEpic(Epic epic);
+    int updateEpic(Epic epic);
 
     int createSubTask(SubTask subTask);
 
-    boolean updateSubTask(SubTask subTask);
+    int updateSubTask(SubTask subTask);
 
     void deleteTaskById(int taskId);
 

@@ -37,27 +37,21 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     @Override
     public int createEpic(Epic epic) {
         int epicId = super.createEpic(epic);
-        if (epicId != -1) {
-            save();
-        }
+        save();
         return epicId;
     }
 
     @Override
     public int createSubTask(SubTask subTask) {
         int subTaskId = super.createSubTask(subTask);
-        if (subTaskId != -1) {
-            save();
-        }
+        save();
         return subTaskId;
     }
 
     @Override
     public int createTask(Task task) {
         int taskId = super.createTask(task);
-        if (taskId != -1) {
-            save();
-        }
+        save();
         return taskId;
     }
 
@@ -98,30 +92,24 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public boolean updateEpic(Epic epic) {
-        boolean isUpdate = super.updateEpic(epic);
-        if (isUpdate) {
-            save();
-        }
-        return isUpdate;
+    public int updateEpic(Epic epic) {
+        int epiId = super.updateEpic(epic);
+        save();
+        return epiId;
     }
 
     @Override
-    public boolean updateSubTask(SubTask subTask) {
-        boolean isUpdate = super.updateSubTask(subTask);
-        if (isUpdate) {
-            save();
-        }
-        return isUpdate;
+    public int updateSubTask(SubTask subTask) {
+        int subTaskId = super.updateSubTask(subTask);
+        save();
+        return subTaskId;
     }
 
     @Override
-    public boolean updateTask(Task task) {
-        boolean isUpdate = super.updateTask(task);
-        if (isUpdate) {
-            save();
-        }
-        return isUpdate;
+    public int updateTask(Task task) {
+        int taskId = super.updateTask(task);
+        save();
+        return task.getId();
     }
 
     @Override

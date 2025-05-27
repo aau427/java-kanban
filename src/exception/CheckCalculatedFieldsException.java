@@ -1,6 +1,6 @@
 package exception;
 
-public class CheckCalculatedFieldsException extends Exception {
+public class CheckCalculatedFieldsException extends RuntimeException {
     public CheckCalculatedFieldsException(String message) {
         super(message);
     }

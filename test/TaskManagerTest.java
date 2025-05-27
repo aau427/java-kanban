@@ -1,5 +1,6 @@
 import common.Managers;
 import exception.ManagerIntervalException;
+import exception.ManagerSaveException;
 import managers.TaskManager;
 import model.Epic;
 import model.SubTask;
@@ -52,7 +53,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
         @DisplayName("Менеджер не добавляет задачу, если  она ВНУТРИ интервала")
         @Test
-        public void shouldManagerDontAddTaskIfTasksCross() {
+        public void shouldManagerDoesNotAddTaskIfTasksCross() {
             taskId = taskManager.createTask(task);
             task = taskManager.getTaskById(taskId);
             LocalDateTime startDateTime1 = LocalDateTime.parse("12.01.2025 00:00", dateTimeFormatter);
@@ -211,10 +212,11 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
             task = new Task(taskId, "изменил название", "изменил комментарий", States.DONE,
                     newStartDateTime, newDuration);
-            boolean wasUpdated = taskManager.updateTask(task);
-            task = taskManager.getTaskById(taskId);
 
-            assertTrue(wasUpdated, "Не поменял");
+            assertDoesNotThrow(() -> {
+                taskId = taskManager.updateTask(task);
+            }, "Задача 2 должна добавляться, т.к. освободился интервал при изменении задачи 1");
+            task = taskManager.getTaskById(taskId);
             assertEquals("изменил название", task.getName(), "Не поменял название!");
             assertEquals("изменил комментарий", task.getDescription(), "Не поменял название!");
             assertEquals(States.DONE, task.getState(), "Не поменял статус!");
@@ -223,6 +225,33 @@ abstract class TaskManagerTest<T extends TaskManager> {
                     "Не поменял дату начала");
             assertEquals(LocalDateTime.parse("14.06.2025 00:00", dateTimeFormatter), task.getEndTime(),
                     "Не поменял дату окончания");
+        }
+
+        @DisplayName("TaskManager не обновляет задачу, если ее нет в taskList")
+        @Test
+        public void shouldTaskManagerDoesNotUpdateTaskIfTaskNotCreated() {
+            LocalDateTime newStartDateTime = LocalDateTime.parse("13.06.2025 00:00", dateTimeFormatter);
+            Duration newDuration = Duration.ofDays(1);
+            taskId = 666;
+            task = new Task(666, "изменил название", "изменил комментарий", States.DONE,
+                    newStartDateTime, newDuration);
+
+            assertThrows(ManagerSaveException.class, () -> {
+                taskId = taskManager.updateTask(task);
+            }, "Обновление ранее несозданной задачи должно приводить к исключению!");
+        }
+
+        @DisplayName("TaskManager не обновляет задачу без Id")
+        @Test
+        public void shouldTaskManagerDoesNotUpdateTaskWithoutId() {
+            LocalDateTime newStartDateTime = LocalDateTime.parse("13.06.2025 00:00", dateTimeFormatter);
+            Duration newDuration = Duration.ofDays(1);
+            task = new Task("изменил название", "изменил комментарий", States.DONE,
+                    newStartDateTime, newDuration);
+
+            assertThrows(ManagerSaveException.class, () -> {
+                taskId = taskManager.updateTask(task);
+            }, "Обновление задачи без Id должно приводить к исключению!");
         }
 
         @DisplayName("При изменении задачи высвобождается старый интервал")
@@ -264,10 +293,9 @@ abstract class TaskManagerTest<T extends TaskManager> {
         public void shouldTasksWithSetIdAndGeneratedIdWillNotConflict() {
             Task task1 = new Task(taskId, "Какая-то другая задача", "Потихоньку едет крыша!!!!", States.DONE,
                     task.getStartTime(), task.getDuration());
-
-            int task1Id = taskManager.createTask(task1);
-
-            assertNotEquals(taskId, task1Id, "Задачи конфликтуют внутри TaskManager!");
+            assertThrows(ManagerSaveException.class, () -> {
+                int task1Id = taskManager.createTask(task1);
+            }, "Добавление задачи c заданным ID должно приводить к исключению!");
         }
     }
 
@@ -303,7 +331,6 @@ abstract class TaskManagerTest<T extends TaskManager> {
             taskManager.updateTask(newTask);
 
             Task taskFromHistory = taskManager.getHistory().getFirst();
-            System.out.println(taskManager.getHistory());
 
             assertEquals(2, taskManager.getHistory().size());
             assertEquals(taskId, taskFromHistory.getId(), "неправильный ID в истории");
@@ -383,22 +410,45 @@ abstract class TaskManagerTest<T extends TaskManager> {
         @Test
         public void shouldTaskManagerUpdateEpic() {
             epic = new Epic(epicId, "изменил название", "изменил комментарий");
-            boolean wasUpdated = taskManager.updateEpic(epic);
-            epic = taskManager.getEpicById(epicId);
 
-            assertTrue(wasUpdated, "Не поменял");
+            assertDoesNotThrow(() -> {
+                taskManager.updateEpic(epic);
+            }, "Не обновил Эпик!");
+            taskManager.updateEpic(epic);
+
+            epic = taskManager.getEpicById(epicId);
             assertEquals("изменил название", epic.getName(), "Не поменял название!");
             assertEquals("изменил комментарий", epic.getDescription(), "Не поменял название!");
+        }
+
+        @DisplayName("TaskManager не обновляет Эпик без Id")
+        @Test
+        public void shouldTaskManagerDoesNotUpdateEpicWithoutId() {
+            epic = new Epic("изменил название", "изменил комментарий");
+
+            assertThrows(ManagerSaveException.class, () -> {
+                taskManager.updateEpic(epic);
+            }, "Обновление Эпика без ID должно приводить к исключению!");
+        }
+
+        @DisplayName("TaskManager не обновляет несозданный Эпик")
+        @Test
+        public void shouldTaskManagerDoesNotUpdateNotCreatedEpic() {
+            epic = new Epic(666, "изменил название", "изменил комментарий");
+
+            assertThrows(ManagerSaveException.class, () -> {
+                taskManager.updateEpic(epic);
+            }, "Обновление ранее несозданного Эпика должно приводить к исключению!");
         }
 
         @DisplayName("Эпик нельзя сделать своей же подзадачей")
         @Test
         public void shouldNotEpicMakeIdOwnSubTask() {
-            subTask1 = new SubTask(epicId, "Подазадач", "Комментарий", States.NEW, epicId,
+            subTask1 = new SubTask(epicId, "Подзадач", "Комментарий", States.NEW, epicId,
                     LocalDateTime.now(), Duration.ofDays(1));
-            int subTask1Id = taskManager.createSubTask(subTask1);
-
-            assertEquals(-1, subTask1Id, "Эпик нельзя сделать своей же подзадачей!");
+            assertThrows(ManagerSaveException.class, () -> {
+                int subTask1Id = taskManager.createSubTask(subTask1);
+            }, "Порождение подзадачи с указанным ID должно привести к исключению!");
         }
 
         @DisplayName("Экземпляры Epic равны друг другу, если равен их Id")
@@ -462,7 +512,6 @@ abstract class TaskManagerTest<T extends TaskManager> {
         @Test
         public void shouldEpicCorrectAfterSubTaskDelete() {
             epic = taskManager.getEpicById(epicId);
-            System.out.println(taskManager.getAllSubTaskForEpic(epic));
             taskManager.deleteSubTaskById(subTask1Id);
 
             epic = taskManager.getEpicById(epicId);
@@ -568,7 +617,6 @@ abstract class TaskManagerTest<T extends TaskManager> {
             assertEquals(States.IN_PROGRESS, epic.getState(), "Статус Эпика не перерассчитался");
         }
 
-        //TODO:
         @DisplayName("Статус эпика автоматически перерасcчитывается c DONE на NEW")
         @Test
         public void shouldEpicStateAutoRecalc2NEW() {
@@ -815,7 +863,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
             subTask2Id = taskManager.createSubTask(subTask2);
         }
 
-        @DisplayName("TaskManager действительно добавляет подзадачу")
+        @DisplayName("TaskManager действительно создает подзадачу")
         @Test
         public void shouldTaskManagerAddSubTask() {
 
@@ -894,9 +942,9 @@ abstract class TaskManagerTest<T extends TaskManager> {
             epic1Id = 666;
             subTask1 = new SubTask("Подзадача", "Коммент", States.DONE, epic1Id,
                     startDateTime1, duration1);
-            int isCreate = taskManager.createSubTask(subTask1);
-
-            assertNotEquals(1, isCreate, "Подзадача с несуществующим эпиком породилась!");
+            assertThrows(ManagerSaveException.class, () -> {
+                int epic1Id = taskManager.createSubTask(subTask1);
+            }, "Порождение подзадачи несуществующего Эпика должно приводить к исключению!");
         }
 
         @DisplayName("SubTask нельзя сделать своим же эпиком")
@@ -904,9 +952,10 @@ abstract class TaskManagerTest<T extends TaskManager> {
         public void shouldNotSubTaskMakeItOwnEpic() {
             subTask1 = new SubTask(subTask1Id, subTask1.getName(), subTask1.getDescription(), subTask1.getState(),
                     subTask1Id, startDateTime1, duration1);
-            boolean isDone = taskManager.updateSubTask(subTask1);
 
-            assertFalse(isDone, "Сделал подзадачу своим же эпиком!");
+            assertThrows(ManagerSaveException.class, () -> {
+                taskManager.updateSubTask(subTask1);
+            }, "Порождение подзадачи несуществующего Эпика должно приводить к исключению!");
         }
 
         @DisplayName("Проверка истории")

@@ -151,7 +151,6 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
         assertEquals(epicId, manager1.getHistory().getFirst().getId(), "Не тот эпик в истории");
     }
 
-    //TODO:
     @Test
     @DisplayName("Задача с пустым startTine загружается корректно")
     public void shouldTaskWithNullStartTimeLoadCorrect() {
