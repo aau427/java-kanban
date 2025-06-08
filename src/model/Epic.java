@@ -25,8 +25,7 @@ public class Epic extends Task {
 
     @Override
     public LocalDateTime getEndTime() {
-        throw new RuntimeException("В классе Epic запрещено использовать getEndTime(). " +
-                "Воспользуйтесь getEndTimeOptional");
+        return endTime;
     }
 
     public Optional<LocalDateTime> getEndTimeOptional() {
@@ -35,8 +34,9 @@ public class Epic extends Task {
 
     @Override
     public LocalDateTime getStartTime() {
-        throw new RuntimeException("В классе Epic запрещено использовать getStartTime(). " +
-                "Воспользуйтесь getStartTimeOptional");
+        //throw new RuntimeException("В классе Epic запрещено использовать getStartTime(). " +
+        //"Воспользуйтесь getStartTimeOptional");
+        return startTime;
     }
 
     public Optional<LocalDateTime> getStartTimeOptional() {

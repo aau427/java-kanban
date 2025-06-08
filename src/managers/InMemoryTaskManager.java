@@ -2,8 +2,9 @@ package managers;
 
 import common.Managers;
 import comparators.TaskByStartDateComparator;
-import exception.CheckCalculatedFieldsException;
+import exception.LogicalErrorException;
 import exception.ManagerSaveException;
+import exception.TaskNotFoundException;
 import history.HistoryManager;
 import model.Epic;
 import model.SubTask;
@@ -13,6 +14,7 @@ import referencebook.States;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class InMemoryTaskManager implements TaskManager {
     private final Map<Integer, Task> taskList = new HashMap<>();
@@ -24,12 +26,12 @@ public class InMemoryTaskManager implements TaskManager {
     private final TreeSet<Task> prioritizedTasks = new TreeSet<>(new TaskByStartDateComparator());
 
     @Override
-    public int createTask(Task task) throws ManagerSaveException {
+    public int createTask(Task task) throws LogicalErrorException {
         if (task.getId() != null) {
-            throw new ManagerSaveException("При создании задачи указан ID, это работа  TaskManager-а!");
+            throw new LogicalErrorException("При создании задачи указан ID, это работа  TaskManager-а!");
         }
         if (!task.hasValidFields()) {
-            throw new ManagerSaveException("При создании задачи не прошли базовые проверки!");
+            throw new LogicalErrorException("При создании задачи не прошли базовые проверки!");
         }
         int taskId = getNextId();
         Duration duration = task.getDuration() != null ? task.getDuration() : Duration.ZERO;
@@ -47,16 +49,16 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public int updateTask(Task task) throws ManagerSaveException {
+    public int updateTask(Task task) throws TaskNotFoundException, LogicalErrorException {
         if (task.getId() == null) {
-            throw new ManagerSaveException("При обновлении задачи не указан ее Id, не могу понять, что менять!");
+            throw new TaskNotFoundException("При обновлении задачи не указан ее Id, не могу понять, что менять!");
         }
         if (!task.hasValidFields()) {
-            throw new ManagerSaveException("При обновлении задачи не прошли базовые проверки!");
+            throw new LogicalErrorException("При обновлении задачи не прошли базовые проверки!");
         }
         Task oldTask = getTaskByIdWithoutHistory(task.getId());
         if (oldTask == null) {
-            throw new ManagerSaveException("При обновлении " + task.getId() + " не нашел ее в списке!");
+            throw new TaskNotFoundException("При обновлении " + task.getId() + " не нашел ее в списке!");
         }
         restoreIntervalsForTask(oldTask);
         return createTaskCommon(new Task(task.getId(), task.getName(), task.getDescription(), task.getState(),
@@ -65,14 +67,14 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public int createEpic(Epic epic) throws ManagerSaveException, CheckCalculatedFieldsException {
+    public int createEpic(Epic epic) throws LogicalErrorException {
         if (epic.getId() != null) {
-            throw new ManagerSaveException("При создании Эпика указан Id! это работа TaskManager-а!");
+            throw new LogicalErrorException("При создании Эпика указан Id! это работа TaskManager-а!");
         }
         checkCalculatedFieldsForNewEpic(epic);
 
         if (!epic.hasValidFields()) {
-            throw new ManagerSaveException("При создании Эпика не прошли базовые проверки");
+            throw new LogicalErrorException("При создании Эпика не прошли базовые проверки");
         }
         int epicId = getNextId();
         return createEpicCommon(new Epic(epicId, epic.getName(), epic.getDescription()));
@@ -85,17 +87,17 @@ public class InMemoryTaskManager implements TaskManager {
 
     //пользователь может менять наименование и комментарий к эпику, остальное считается от подзадач
     @Override
-    public int updateEpic(Epic epic) throws ManagerSaveException {
+    public int updateEpic(Epic epic) throws TaskNotFoundException, LogicalErrorException {
         if (epic.getId() == null) {
-            throw new ManagerSaveException("При обновлении Эпика не указан его ID! не могу понять, что менять!");
+            throw new TaskNotFoundException("При обновлении Эпика не указан его ID! не могу понять, что менять!");
         }
         if (!epic.hasValidFields()) {
-            throw new ManagerSaveException("При обновлении Эпика не прошли базовые проверки!");
+            throw new LogicalErrorException("При обновлении Эпика не прошли базовые проверки!");
         }
         Epic oldEpic = epicList.get(epic.getId());
         if (oldEpic == null) {
             String errorMessage = String.format("Ошибка: не нашел Epic № %d в списке  при его обновлении!", epic.getId());
-            throw new ManagerSaveException(errorMessage);
+            throw new TaskNotFoundException(errorMessage);
         }
         oldEpic.setName(epic.getName());
         oldEpic.setDescription(epic.getDescription());
@@ -103,19 +105,19 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public int createSubTask(SubTask subTask) throws ManagerSaveException {
+    public int createSubTask(SubTask subTask) throws LogicalErrorException {
         if (subTask.getId() != null) {
-            throw new ManagerSaveException("При создании подзадачи указан Id! это работа TaskManager-а!");
+            throw new LogicalErrorException("При создании подзадачи указан Id! это работа TaskManager-а!");
         }
         if (!subTask.hasValidFields()) {
-            throw new ManagerSaveException("Не могу породить/изменить подзадачу: не прошли базовые проверки!");
+            throw new LogicalErrorException("Не могу породить/изменить подзадачу: не прошли базовые проверки!");
         }
         int parentEpicId = subTask.getParentEpic();
         /*Судя по ТЗ в историю пишем, если кто-то "смотрит" эпик
          Нам здесь не нужно записывать в историю, т.к. это чисто техническое получение Епика*/
         Epic epic = getEpicByIdWithoutHistory(parentEpicId);
         if (epic == null) {
-            throw new ManagerSaveException("Не могу породить/изменить подзадачу! Не нашел родительский Эпик № " + parentEpicId);
+            throw new TaskNotFoundException("Не могу породить/изменить подзадачу! Не нашел родительский Эпик № " + parentEpicId);
         }
         int subTaskId = getNextId();
         epic.getChildSubTasks().add(subTaskId);
@@ -134,8 +136,6 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     private void calcStateAndTimeForEpic(Epic epic) {
-        //а не замахнуться ли нам на Вильяма нашего Шекспира : все вообще за один проход, включая статус.
-        //раз так, то нафик извращения в виде функционального стиля, отлаживаться невозможно
         LocalDateTime starTime = null;
         LocalDateTime endTime = null;
         Duration duration = Duration.ofDays(0);
@@ -151,7 +151,7 @@ public class InMemoryTaskManager implements TaskManager {
         boolean isAllSubTasksAreNew = true;
         for (Integer index : subTaskList) {
             SubTask subTask = getSubTaskByIdWithoutHistory(index);
-            if ((isAllSubTasksAreDone == true) || (isAllSubTasksAreNew == true)) {
+            if ((isAllSubTasksAreDone) || (isAllSubTasksAreNew)) {
                 if (subTask.getState() == States.DONE) {
                     isAllSubTasksAreNew = false;
                 } else if (subTask.getState() == States.NEW) {
@@ -189,22 +189,22 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public int updateSubTask(SubTask subTask) throws ManagerSaveException {
         if (subTask.getId() == null) {
-            throw new ManagerSaveException("Не указан ID подзадачи! не могу понять, что менять!");
+            throw new TaskNotFoundException("Не указан ID подзадачи! не могу понять, что менять!");
         }
         if (!subTask.hasValidFields()) {
-            throw new ManagerSaveException("Не могу породить/изменить подзадачу: не прошла базовые проверки!");
+            throw new LogicalErrorException("Не могу породить/изменить подзадачу: не прошла базовые проверки!");
         }
         SubTask oldSubtask = subTaskList.get(subTask.getId());
         if (oldSubtask == null) {
             String errorMessage = String.format("Не нашел подзадачу № %d в списке  при ее обновлении!", subTask.getId());
-            throw new ManagerSaveException(errorMessage);
+            throw new TaskNotFoundException(errorMessage);
         }
         int parentEpicId = subTask.getParentEpic();
         Epic epic = getEpicByIdWithoutHistory(parentEpicId);
         if (epic == null) {
             String errorMessage = String.format("Не могу породить/изменить подзадачу №%d! Не нашел ee Эпик № %d",
                     subTask.getId(), parentEpicId);
-            throw new ManagerSaveException(errorMessage);
+            throw new TaskNotFoundException(errorMessage);
         }
         /*В subTask может поменяться не только наименование, комментарий, статус, а также Эпик!!!
         В случае, если в подзадаче меняется ЭПИК, то необходимо:
@@ -226,16 +226,24 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteTaskById(int taskId) {
+        Task task = getTaskByIdWithoutHistory(taskId);
+        if (task == null) {
+            throw new TaskNotFoundException("Задача " + taskId + " не найдена!");
+        }
         historyManager.remove(taskId);
-        Task task = taskList.remove(taskId);
+        task = taskList.remove(taskId);
         prioritizedTasks.remove(task);
         restoreIntervalsForTask(task);
     }
 
     @Override
     public void deleteSubTaskById(int subTaskId) {
+        SubTask subTask = getSubTaskByIdWithoutHistory(subTaskId);
+        if (subTask == null) {
+            throw new TaskNotFoundException("Не могу найти подзадачу " + subTaskId);
+        }
         historyManager.remove(subTaskId);
-        SubTask subTask = subTaskList.remove(subTaskId);
+        subTask = subTaskList.remove(subTaskId);
         prioritizedTasks.remove(subTask);
         restoreIntervalsForTask(subTask);
         Epic epic = epicList.get(subTask.getParentEpic());
@@ -246,6 +254,10 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteEpicById(int epicId) {
+        Epic epic = getEpicByIdWithoutHistory(epicId);
+        if (epic == null) {
+            throw new TaskNotFoundException("Не могу найти эпик " + epicId);
+        }
         clearSubTaskListForEpic(epicId);
         epicList.remove(epicId);
         historyManager.remove(epicId);
@@ -289,6 +301,8 @@ public class InMemoryTaskManager implements TaskManager {
         Task task = taskList.get(taskId);
         if (task != null) {
             historyManager.addTask(task);
+        } else {
+            throw new TaskNotFoundException("Не найдена задача " + taskId);
         }
         return task;
     }
@@ -300,7 +314,7 @@ public class InMemoryTaskManager implements TaskManager {
             historyManager.addTask(epic);
             return epic.getEpicCopy();
         } else {
-            return null;
+            throw new TaskNotFoundException("Не найден эпик " + epicId);
         }
     }
 
@@ -309,6 +323,8 @@ public class InMemoryTaskManager implements TaskManager {
         SubTask subTask = subTaskList.get(subTaskId);
         if (subTask != null) {
             historyManager.addTask(subTask);
+        } else {
+            throw new TaskNotFoundException("Не найдена подзадача " + subTaskId);
         }
         return subTask;
     }
@@ -342,33 +358,19 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
+    public List<SubTask> getEpicSubtasks(int epicId) {
+        return getEpicByIdWithoutHistory(epicId)
+                .getChildSubTasks()
+                .stream()
+                .map(subTaskList::get)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<Task> getPrioritizedTasks() {
         return new ArrayList<Task>(prioritizedTasks);
     }
 
-    /*private void setState(Epic epic) {
-        if ((epic.getChildSubTasks() == null) || epic.getChildSubTasks().isEmpty()) {
-            epic.setState(States.NEW);
-        } else {
-            boolean isAllSubTasksAreDone = true;
-            boolean isAllSubTasksAreNew = true;
-            for (SubTask subTask : getAllSubTaskForEpic(epic)) {
-                if (subTask.getState() == States.DONE) {
-                    isAllSubTasksAreNew = false;
-                } else if (subTask.getState() == States.NEW) {
-                    isAllSubTasksAreDone = false;
-                } else {
-                    epic.setState(States.IN_PROGRESS);
-                    return;
-                }
-            }
-            if (isAllSubTasksAreNew) {
-                epic.setState(States.NEW);
-            } else if (isAllSubTasksAreDone) {
-                epic.setState(States.DONE);
-            }
-        }
-    }*/
 
     private void clearSubTaskListForEpic(int epicId) {
         Epic epic = epicList.get(epicId);
@@ -416,12 +418,12 @@ public class InMemoryTaskManager implements TaskManager {
         return historyManager;
     }
 
-    private void checkCalculatedFieldsForNewEpic(Epic epic) throws CheckCalculatedFieldsException {
+    private void checkCalculatedFieldsForNewEpic(Epic epic) throws LogicalErrorException {
         if (epic.getStartTimeOptional().isPresent()) {
-            throw new CheckCalculatedFieldsException("При создании эпика указан startDate! Это работа TaskManager-a");
+            throw new LogicalErrorException("При создании эпика указан startDate! Это работа TaskManager-a");
         }
         if (epic.getEndTimeOptional().isPresent()) {
-            throw new CheckCalculatedFieldsException("При создании эпика указан endDate! Это работа TaskManager-a");
+            throw new LogicalErrorException("При создании эпика указан endDate! Это работа TaskManager-a");
         }
     }
 
