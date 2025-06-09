@@ -5,6 +5,7 @@ import adapter.LocalDateTimeAdapter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpExchange;
+import managers.TaskManager;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -15,16 +16,22 @@ import java.time.LocalDateTime;
 public class BaseHttpHandler {
 
     protected static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+    protected static final Gson GSON = prepareGson();
+    protected final TaskManager manager;
+
+    public BaseHttpHandler(TaskManager manager) {
+        this.manager = manager;
+    }
 
     public void handle(HttpExchange httpExchange) throws IOException {
     }
 
-    protected void sendMessage(HttpExchange h, int rCode, String text) throws IOException {
+    protected void sendMessage(HttpExchange httpExchange, int statusCode, String text) throws IOException {
         byte[] resp = text.getBytes(StandardCharsets.UTF_8);
-        h.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
-        h.sendResponseHeaders(rCode, resp.length);
-        h.getResponseBody().write(resp);
-        h.close();
+        httpExchange.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
+        httpExchange.sendResponseHeaders(statusCode, resp.length);
+        httpExchange.getResponseBody().write(resp);
+        httpExchange.close();
     }
 
     protected int getTaskIdFromUriRequest(String path) throws NumberFormatException {
@@ -33,7 +40,7 @@ public class BaseHttpHandler {
         return Integer.parseInt(idStr);
     }
 
-    protected Gson prepareGson() {
+    private static Gson prepareGson() {
         return new GsonBuilder()
                 .setPrettyPrinting()
                 .serializeNulls()

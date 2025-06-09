@@ -6,19 +6,10 @@ import handlers.*;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
 public class HttpTaskServer {
     private static final int PORT = 8080;
-    private final Charset charset = StandardCharsets.UTF_8;
-    private final TaskManager manager;
     private final HttpServer httpServer;
-    private final TaskHandler taskHandler;
-    private final EpicHandler epicHandler;
-    private final SubTaskHandler subTaskHandler;
-    private final HistoryHandler historyHandler;
-    private final PrioritizedHandler prioritizedHandler;
 
 
     public static void main(String[] args) throws IOException {
@@ -27,18 +18,17 @@ public class HttpTaskServer {
     }
 
     public HttpTaskServer(TaskManager manager) throws IOException {
-        this.manager = manager;
-        taskHandler = new TaskHandler(manager);
-        epicHandler = new EpicHandler(manager);
-        subTaskHandler = new SubTaskHandler(manager);
-        historyHandler = new HistoryHandler(manager);
-        prioritizedHandler = new PrioritizedHandler(manager);
+        TaskHandler taskHandler = new TaskHandler(manager);
+        EpicHandler epicHandler = new EpicHandler(manager);
+        SubTaskHandler subTaskHandler = new SubTaskHandler(manager);
+        HistoryHandler historyHandler = new HistoryHandler(manager);
+        PrioritizedHandler prioritizedHandler = new PrioritizedHandler(manager);
         httpServer = HttpServer.create(new InetSocketAddress(PORT), 0);
         httpServer.createContext("/tasks", taskHandler::handle);
         httpServer.createContext("/epics", epicHandler::handle);
         httpServer.createContext("/subtasks", subTaskHandler::handle);
-        httpServer.createContext("/history", historyHandler::historyHandler);
-        httpServer.createContext("/prioritized", prioritizedHandler::prioritizedHandler);
+        httpServer.createContext("/history", historyHandler::handle);
+        httpServer.createContext("/prioritized", prioritizedHandler::handle);
         System.out.println("HTTP-сервер запущен на " + PORT + " порту!");
     }
 

@@ -16,7 +16,6 @@ public class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
     @Override
     public void write(final JsonWriter jsonWriter, final LocalDateTime localDate) throws IOException {
         if (localDate == null) {
-            //jsonWriter.nullValue();
             jsonWriter.value("дата не установлена");
         } else {
             jsonWriter.value(localDate.format(dtf));
@@ -30,6 +29,5 @@ public class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
         if (str.equals("дата не установлена")) {
             return null;
         } else return LocalDateTime.parse(str, dtf);
-        //return LocalDateTime.parse(str, dtf);
     }
 }

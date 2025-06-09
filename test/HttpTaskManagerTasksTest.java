@@ -27,10 +27,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class HttpTaskManagerTasksTest {
 
-    TaskManager manager;
-    HttpTaskServer taskServer;
-    CustomHttpClient httpClient;
-    Gson gson;
+    private final TaskManager manager;
+    private final HttpTaskServer taskServer;
+    private final CustomHttpClient httpClient;
+    private final Gson gson;
 
     public HttpTaskManagerTasksTest() {
         manager = new InMemoryTaskManager();
@@ -72,7 +72,7 @@ class HttpTaskManagerTasksTest {
     @Nested
     @DisplayName("Проверяем /tasks")
     class Tasks {
-        Task task;
+        private Task task;
 
         @BeforeEach
         public void setUp() {
@@ -229,7 +229,7 @@ class HttpTaskManagerTasksTest {
     @Nested
     @DisplayName("Проверяем /epics")
     class Epics {
-        Epic epic;
+        private Epic epic;
 
         @BeforeEach
         public void setUp() {
@@ -355,8 +355,8 @@ class HttpTaskManagerTasksTest {
     @Nested
     @DisplayName("Проверяем /subTasks")
     class SubTasks {
-        Epic epic;
-        SubTask subTask;
+        private Epic epic;
+        private SubTask subTask;
 
         @BeforeEach
         public void setUp() {
@@ -536,9 +536,9 @@ class HttpTaskManagerTasksTest {
     @Nested
     @DisplayName("Проверяем /history")
     class History {
-        Epic epic;
-        SubTask subTask;
-        Task task;
+        private Epic epic;
+        private SubTask subTask;
+        private Task task;
 
         @BeforeEach
         public void setUp() {
@@ -580,9 +580,9 @@ class HttpTaskManagerTasksTest {
     @Nested
     @DisplayName("Проверяем /prioritized")
     class PrioritizedTasks {
-        Epic epic;
-        SubTask subTask;
-        Task task;
+        private Epic epic;
+        private SubTask subTask;
+        private Task task;
 
         @BeforeEach
         public void setUp() {

@@ -3,14 +3,11 @@ package adapter;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import common.Managers;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.time.format.DateTimeFormatter;
 
 public class DurationAdapter extends TypeAdapter<Duration> {
-    private static final DateTimeFormatter dtf = Managers.getDefaultDateTimeFormatter();
 
     @Override
     public void write(final JsonWriter jsonWriter, final Duration duration) throws IOException {

@@ -10,14 +10,13 @@ import java.io.IOException;
 import java.util.List;
 
 public class PrioritizedHandler extends BaseHttpHandler {
-    private final TaskManager manager;
 
     public PrioritizedHandler(TaskManager manager) {
-        super();
-        this.manager = manager;
+        super(manager);
     }
 
-    public void prioritizedHandler(HttpExchange httpExchange) throws IOException {
+    @Override
+    public void handle(HttpExchange httpExchange) throws IOException {
         System.out.println("Обрабатываю запрос на prioritized");
         String method = httpExchange.getRequestMethod();
         if (method.equals("GET")) {
@@ -29,14 +28,14 @@ public class PrioritizedHandler extends BaseHttpHandler {
 
     private void sendPrioritizedList(HttpExchange httpExchange) throws IOException {
         System.out.println("вызван метод Get");
-        String[] pathItems = super.getPathItems(httpExchange);
+        String[] pathItems = getPathItems(httpExchange);
         String gson;
         if (pathItems.length == 2) {
             List<Task> prioritizedTasksList = manager.getPrioritizedTasks();
-            gson = super.prepareGson().toJson(prioritizedTasksList);
+            gson = GSON.toJson(prioritizedTasksList);
         } else {
             throw new BadRequestException("Недопустимый формат запроса get: " + httpExchange.getRequestURI().getPath());
         }
-        super.sendMessage(httpExchange, 200, gson);
+        sendMessage(httpExchange, 200, gson);
     }
 }

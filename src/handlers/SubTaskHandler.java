@@ -9,11 +9,9 @@ import java.io.IOException;
 import java.util.List;
 
 public class SubTaskHandler extends BaseHttpHandler {
-    private final TaskManager manager;
 
     public SubTaskHandler(TaskManager manager) {
-        super();
-        this.manager = manager;
+        super(manager);
     }
 
     @Override
@@ -51,36 +49,36 @@ public class SubTaskHandler extends BaseHttpHandler {
 
     private void sendSubTaskListOr1SubTask(HttpExchange httpExchange) throws IOException {
         System.out.println("вызван метод Get");
-        String[] pathItems = super.getPathItems(httpExchange);
+        String[] pathItems = getPathItems(httpExchange);
         String gson;
         if (pathItems.length == 2) {
             List<SubTask> subTaskList = manager.getSubTaskList();
-            gson = super.prepareGson().toJson(subTaskList);
+            gson = GSON.toJson(subTaskList);
         } else if (pathItems.length == 3) {
             int subTaskId = getTaskIdFromUriRequest(httpExchange.getRequestURI().getPath());
             SubTask subTask = manager.getSubTaskById(subTaskId);
-            gson = super.prepareGson().toJson(subTask);
+            gson = GSON.toJson(subTask);
         } else {
             throw new BadRequestException("Недопустимый формат запроса get: " + httpExchange.getRequestURI().getPath());
         }
-        super.sendMessage(httpExchange, 200, gson);
+        sendMessage(httpExchange, 200, gson);
     }
 
     void createOrUpdateSubTask(HttpExchange httpExchange) throws IOException {
         System.out.println("вызван метод Post");
         String message;
-        String[] pathItems = super.getPathItems(httpExchange);
+        String[] pathItems = getPathItems(httpExchange);
         String bodyStr = new String(httpExchange.getRequestBody().readAllBytes(), DEFAULT_CHARSET);
         if (bodyStr.isBlank()) {
             throw new NoBodyException("При обновлении/изменении подзадачи не указан Body ");
         }
-        SubTask subTask = super.prepareGson().fromJson(bodyStr, SubTask.class);
+        SubTask subTask = GSON.fromJson(bodyStr, SubTask.class);
         int subTaskId;
         if (pathItems.length == 2) {
             subTaskId = manager.createSubTask(subTask);
             message = "Задача id = " + subTaskId + " успешно создана";
         } else if (pathItems.length == 3) {
-            subTaskId = super.getTaskIdFromUriRequest(httpExchange.getRequestURI().getPath());
+            subTaskId = getTaskIdFromUriRequest(httpExchange.getRequestURI().getPath());
             if (subTaskId != subTask.getId()) {
                 //в строке запроса переделали один id, в теле другой
                 throw new LogicalErrorException("Кривая логика запроса при обновлении задачи " +
@@ -96,18 +94,18 @@ public class SubTaskHandler extends BaseHttpHandler {
 
     private void deleteOneOrAllSubTasks(HttpExchange httpExchange) throws IOException {
         System.out.println("вызван метод Delete");
-        String[] pathItems = super.getPathItems(httpExchange);
+        String[] pathItems = getPathItems(httpExchange);
         String message;
         if (pathItems.length == 2) {
             manager.deleteAllSubTasks();
             message = "Все подзадачи успешно удалены!";
         } else if (pathItems.length == 3) {
-            int subTaskId = super.getTaskIdFromUriRequest(httpExchange.getRequestURI().getPath());
+            int subTaskId = getTaskIdFromUriRequest(httpExchange.getRequestURI().getPath());
             manager.deleteSubTaskById(subTaskId);
             message = "Подзадача id = " + subTaskId + " успешно удалена!";
         } else {
             throw new BadRequestException("Недопустимый формат запроса get: " + httpExchange.getRequestURI().getPath());
         }
-        super.sendMessage(httpExchange, 200, message);
+        sendMessage(httpExchange, 200, message);
     }
 }

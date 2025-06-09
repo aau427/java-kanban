@@ -9,11 +9,9 @@ import java.io.IOException;
 import java.util.List;
 
 public class TaskHandler extends BaseHttpHandler {
-    private final TaskManager manager;
 
     public TaskHandler(TaskManager manager) {
-        super();
-        this.manager = manager;
+        super(manager);
     }
 
     @Override
@@ -51,36 +49,36 @@ public class TaskHandler extends BaseHttpHandler {
 
     private void sendTaskListOr1Task(HttpExchange httpExchange) throws IOException {
         System.out.println("вызван метод Get");
-        String[] pathItems = super.getPathItems(httpExchange);
+        String[] pathItems = getPathItems(httpExchange);
         String gson;
         if (pathItems.length == 2) {
             List<Task> taskList = manager.getTaskList();
-            gson = super.prepareGson().toJson(taskList);
+            gson = GSON.toJson(taskList);
         } else if (pathItems.length == 3) {
             int taskId = getTaskIdFromUriRequest(httpExchange.getRequestURI().getPath());
             Task task = manager.getTaskById(taskId);
-            gson = super.prepareGson().toJson(task);
+            gson = GSON.toJson(task);
         } else {
             throw new BadRequestException("Недопустимый формат запроса get: " + httpExchange.getRequestURI().getPath());
         }
-        super.sendMessage(httpExchange, 200, gson);
+        sendMessage(httpExchange, 200, gson);
     }
 
     void createOrUpdateTask(HttpExchange httpExchange) throws IOException {
         System.out.println("вызван метод Post");
         String message;
-        String[] pathItems = super.getPathItems(httpExchange);
+        String[] pathItems = getPathItems(httpExchange);
         String bodyStr = new String(httpExchange.getRequestBody().readAllBytes(), DEFAULT_CHARSET);
         if (bodyStr.isBlank()) {
             throw new NoBodyException("При обновлении/изменении задачи не указан Body ");
         }
-        Task task = super.prepareGson().fromJson(bodyStr, Task.class);
+        Task task = GSON.fromJson(bodyStr, Task.class);
         int taskId;
         if (pathItems.length == 2) {
             taskId = manager.createTask(task);
             message = "Задача id = " + taskId + " успешно создана";
         } else if (pathItems.length == 3) {
-            taskId = super.getTaskIdFromUriRequest(httpExchange.getRequestURI().getPath());
+            taskId = getTaskIdFromUriRequest(httpExchange.getRequestURI().getPath());
             if (taskId != task.getId()) {
                 //в строке запроса переделали один id, в теле другой
                 throw new LogicalErrorException("Кривая логика запроса при обновлении задачи " +
@@ -96,18 +94,18 @@ public class TaskHandler extends BaseHttpHandler {
 
     private void deleteOneOrAllTasks(HttpExchange httpExchange) throws IOException {
         System.out.println("вызван метод Delete");
-        String[] pathItems = super.getPathItems(httpExchange);
+        String[] pathItems = getPathItems(httpExchange);
         String message;
         if (pathItems.length == 2) {
             manager.deleteAllTasks();
             message = "Все задачи успешно удалены!";
         } else if (pathItems.length == 3) {
-            int taskId = super.getTaskIdFromUriRequest(httpExchange.getRequestURI().getPath());
+            int taskId = getTaskIdFromUriRequest(httpExchange.getRequestURI().getPath());
             manager.deleteTaskById(taskId);
             message = "Задача id = " + taskId + " успешно удалена!";
         } else {
             throw new BadRequestException("Недопустимый формат запроса get: " + httpExchange.getRequestURI().getPath());
         }
-        super.sendMessage(httpExchange, 200, message);
+        sendMessage(httpExchange, 200, message);
     }
 }

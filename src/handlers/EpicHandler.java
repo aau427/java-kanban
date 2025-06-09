@@ -10,13 +10,10 @@ import java.io.IOException;
 import java.util.List;
 
 public class EpicHandler extends BaseHttpHandler {
-    private final TaskManager manager;
 
     public EpicHandler(TaskManager manager) {
-        super();
-        this.manager = manager;
+        super(manager);
     }
-
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
@@ -53,44 +50,44 @@ public class EpicHandler extends BaseHttpHandler {
 
     private void sendTasksOrSubTaskForEpic(HttpExchange httpExchange) throws IOException {
         System.out.println("вызван метод Get");
-        String[] pathItems = super.getPathItems(httpExchange);
+        String[] pathItems = getPathItems(httpExchange);
         String gson;
         //epics
         if (pathItems.length == 2) {
             List<Epic> epicList = manager.getEpicList();
-            gson = super.prepareGson().toJson(epicList);
+            gson = GSON.toJson(epicList);
         } else if (pathItems.length == 3) {
             //ВЫТАЩИТЬ КОНКРЕТНЫЙ ЭПИК
             int epicId = getTaskIdFromUriRequest(httpExchange.getRequestURI().getPath());
             Epic epic = manager.getEpicById(epicId);
-            gson = super.prepareGson().toJson(epic);
+            gson = GSON.toJson(epic);
         } else if (pathItems.length == 4 && pathItems[3].equals("subtasks")) {
             int epicId = getTaskIdFromUriRequest(httpExchange.getRequestURI().getPath());
             List<SubTask> subTaskList = manager.getEpicSubtasks(epicId);
-            gson = super.prepareGson().toJson(subTaskList);
+            gson = GSON.toJson(subTaskList);
 
         } else {
             throw new BadRequestException("Недопустимый формат запроса get: " + httpExchange.getRequestURI().getPath());
         }
 
-        super.sendMessage(httpExchange, 200, gson);
+        sendMessage(httpExchange, 200, gson);
     }
 
     private void createOrUpdateEpic(HttpExchange httpExchange) throws IOException {
         System.out.println("вызван метод Post");
         String message;
-        String[] pathItems = super.getPathItems(httpExchange);
+        String[] pathItems = getPathItems(httpExchange);
         String bodyStr = new String(httpExchange.getRequestBody().readAllBytes(), DEFAULT_CHARSET);
         if (bodyStr.isBlank()) {
             throw new NoBodyException("При обновлении/изменении Эпика не указан Body ");
         }
-        Epic epic = super.prepareGson().fromJson(bodyStr, Epic.class);
+        Epic epic = GSON.fromJson(bodyStr, Epic.class);
         int epicId;
         if (pathItems.length == 2) {
             epicId = manager.createEpic(epic);
             message = "Эпик id = " + epicId + " успешно создан";
         } else if (pathItems.length == 3) {
-            epicId = super.getTaskIdFromUriRequest(httpExchange.getRequestURI().getPath());
+            epicId = getTaskIdFromUriRequest(httpExchange.getRequestURI().getPath());
             if (epicId != epic.getId()) {
                 //в строке запроса переделали один id, в теле другой
                 throw new LogicalErrorException("Кривая логика запроса при обновлении эпика " +
@@ -106,18 +103,18 @@ public class EpicHandler extends BaseHttpHandler {
 
     private void deleteOneOrAllEpics(HttpExchange httpExchange) throws IOException {
         System.out.println("вызван метод Delete");
-        String[] pathItems = super.getPathItems(httpExchange);
+        String[] pathItems = getPathItems(httpExchange);
         String message;
         if (pathItems.length == 2) {
             manager.deleteAllEpics();
             message = "Все эпики успешно удалены!";
         } else if (pathItems.length == 3) {
-            int epicId = super.getTaskIdFromUriRequest(httpExchange.getRequestURI().getPath());
+            int epicId = getTaskIdFromUriRequest(httpExchange.getRequestURI().getPath());
             manager.deleteEpicById(epicId);
             message = "Эпик id = " + epicId + " успешно удален!";
         } else {
             throw new BadRequestException("Недопустимый формат запроса get: " + httpExchange.getRequestURI().getPath());
         }
-        super.sendMessage(httpExchange, 200, message);
+        sendMessage(httpExchange, 200, message);
     }
 }
