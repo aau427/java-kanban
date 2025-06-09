@@ -16,39 +16,7 @@ public class EpicHandler extends BaseHttpHandler {
     }
 
     @Override
-    public void handle(HttpExchange httpExchange) throws IOException {
-        System.out.println("Обрабатываю запрос на /epics");
-        String method = httpExchange.getRequestMethod();
-        try {
-            switch (method) {
-                case "GET":
-                    sendTasksOrSubTaskForEpic(httpExchange);
-                    break;
-                case "POST":
-                    createOrUpdateEpic(httpExchange);
-                    break;
-                case "DELETE":
-                    deleteOneOrAllEpics(httpExchange);
-                    break;
-                default:
-                    System.out.println("Хрен знает, что за метод");
-                    throw new NotSupportedMethodException(method + " не поддерживается нашим API!");
-            }
-        } catch (NotSupportedMethodException e) {
-            sendMessage(httpExchange, 405, e.getMessage());
-        } catch (TaskNotFoundException e) {
-            sendMessage(httpExchange, 404, e.getMessage());
-        } catch (NoBodyException | BadRequestException e) {
-            sendMessage(httpExchange, 400, e.getMessage());
-        } catch (LogicalErrorException e) {
-            sendMessage(httpExchange, 422, e.getMessage());
-        } catch (Exception e) {
-            sendMessage(httpExchange, 500, e.getMessage());
-        }
-
-    }
-
-    private void sendTasksOrSubTaskForEpic(HttpExchange httpExchange) throws IOException {
+    protected void sendTaskOrTaskList(HttpExchange httpExchange) throws IOException {
         System.out.println("вызван метод Get");
         String[] pathItems = getPathItems(httpExchange);
         String gson;
@@ -73,7 +41,8 @@ public class EpicHandler extends BaseHttpHandler {
         sendMessage(httpExchange, 200, gson);
     }
 
-    private void createOrUpdateEpic(HttpExchange httpExchange) throws IOException {
+    @Override
+    protected void createOrUpdateTask(HttpExchange httpExchange) throws IOException {
         System.out.println("вызван метод Post");
         String message;
         String[] pathItems = getPathItems(httpExchange);
@@ -101,7 +70,8 @@ public class EpicHandler extends BaseHttpHandler {
         sendMessage(httpExchange, 201, message);
     }
 
-    private void deleteOneOrAllEpics(HttpExchange httpExchange) throws IOException {
+    @Override
+    protected void deleteTaskOrAllTasks(HttpExchange httpExchange) throws IOException {
         System.out.println("вызван метод Delete");
         String[] pathItems = getPathItems(httpExchange);
         String message;
