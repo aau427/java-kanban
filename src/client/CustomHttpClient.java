@@ -10,7 +10,7 @@ import java.net.http.HttpResponse;
 
 public class CustomHttpClient {
     private final HttpClient httpClient;
-    private final static String HTTP_URI = "http://localhost:8080";
+    private static final String HTTP_URI = "http://localhost:8080";
 
     public CustomHttpClient() {
         this.httpClient = HttpClient.newHttpClient();
