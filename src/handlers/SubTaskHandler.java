@@ -1,14 +1,16 @@
 package handlers;
 
 import com.sun.net.httpserver.HttpExchange;
-import exception.*;
+import exception.BadRequestException;
+import exception.LogicalErrorException;
+import exception.NoBodyException;
 import managers.TaskManager;
 import model.SubTask;
 
 import java.io.IOException;
 import java.util.List;
 
-public class SubTaskHandler extends BaseHttpHandler {
+public class SubTaskHandler extends BaseTaskHttpHandler {
 
     public SubTaskHandler(TaskManager manager) {
         super(manager);
@@ -23,7 +25,7 @@ public class SubTaskHandler extends BaseHttpHandler {
             List<SubTask> subTaskList = manager.getSubTaskList();
             gson = GSON.toJson(subTaskList);
         } else if (pathItems.length == 3) {
-            int subTaskId = getTaskIdFromUriRequest(httpExchange.getRequestURI().getPath());
+            int subTaskId = getTaskIdFromUriRequest(httpExchange);
             SubTask subTask = manager.getSubTaskById(subTaskId);
             gson = GSON.toJson(subTask);
         } else {
@@ -47,7 +49,7 @@ public class SubTaskHandler extends BaseHttpHandler {
             subTaskId = manager.createSubTask(subTask);
             message = "Задача id = " + subTaskId + " успешно создана";
         } else if (pathItems.length == 3) {
-            subTaskId = getTaskIdFromUriRequest(httpExchange.getRequestURI().getPath());
+            subTaskId = getTaskIdFromUriRequest(httpExchange);
             if (subTaskId != subTask.getId()) {
                 //в строке запроса переделали один id, в теле другой
                 throw new LogicalErrorException("Кривая логика запроса при обновлении задачи " +
@@ -70,7 +72,7 @@ public class SubTaskHandler extends BaseHttpHandler {
             manager.deleteAllSubTasks();
             message = "Все подзадачи успешно удалены!";
         } else if (pathItems.length == 3) {
-            int subTaskId = getTaskIdFromUriRequest(httpExchange.getRequestURI().getPath());
+            int subTaskId = getTaskIdFromUriRequest(httpExchange);
             manager.deleteSubTaskById(subTaskId);
             message = "Подзадача id = " + subTaskId + " успешно удалена!";
         } else {

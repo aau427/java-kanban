@@ -1,19 +1,20 @@
 package handlers;
 
 import com.sun.net.httpserver.HttpExchange;
-import exception.*;
+import exception.BadRequestException;
+import exception.LogicalErrorException;
+import exception.NoBodyException;
 import managers.TaskManager;
 import model.Task;
 
 import java.io.IOException;
 import java.util.List;
 
-public class TaskHandler extends BaseHttpHandler {
+public class TaskHandler extends BaseTaskHttpHandler {
 
     public TaskHandler(TaskManager manager) {
         super(manager);
     }
-
 
     @Override
     protected void sendTaskOrTaskList(HttpExchange httpExchange) throws IOException {
@@ -24,7 +25,7 @@ public class TaskHandler extends BaseHttpHandler {
             List<Task> taskList = manager.getTaskList();
             gson = GSON.toJson(taskList);
         } else if (pathItems.length == 3) {
-            int taskId = getTaskIdFromUriRequest(httpExchange.getRequestURI().getPath());
+            int taskId = getTaskIdFromUriRequest(httpExchange);
             Task task = manager.getTaskById(taskId);
             gson = GSON.toJson(task);
         } else {
@@ -48,7 +49,7 @@ public class TaskHandler extends BaseHttpHandler {
             taskId = manager.createTask(task);
             message = "Задача id = " + taskId + " успешно создана";
         } else if (pathItems.length == 3) {
-            taskId = getTaskIdFromUriRequest(httpExchange.getRequestURI().getPath());
+            taskId = getTaskIdFromUriRequest(httpExchange);
             if (taskId != task.getId()) {
                 //в строке запроса переделали один id, в теле другой
                 throw new LogicalErrorException("Кривая логика запроса при обновлении задачи " +
@@ -71,7 +72,7 @@ public class TaskHandler extends BaseHttpHandler {
             manager.deleteAllTasks();
             message = "Все задачи успешно удалены!";
         } else if (pathItems.length == 3) {
-            int taskId = getTaskIdFromUriRequest(httpExchange.getRequestURI().getPath());
+            int taskId = getTaskIdFromUriRequest(httpExchange);
             manager.deleteTaskById(taskId);
             message = "Задача id = " + taskId + " успешно удалена!";
         } else {
