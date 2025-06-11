@@ -23,7 +23,7 @@ import java.util.List;
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
     private final String fileName;
-    private final Charset charset = StandardCharsets.UTF_8;
+    private final Charset charset = Managers.getDefaultcharset();
 
     public FileBackedTaskManager(final String fileName) {
         this.fileName = fileName;

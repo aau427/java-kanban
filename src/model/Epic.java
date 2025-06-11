@@ -7,6 +7,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class Epic extends Task {
@@ -25,18 +26,11 @@ public class Epic extends Task {
 
     @Override
     public LocalDateTime getEndTime() {
-        throw new RuntimeException("В классе Epic запрещено использовать getEndTime(). " +
-                "Воспользуйтесь getEndTimeOptional");
+        return endTime;
     }
 
     public Optional<LocalDateTime> getEndTimeOptional() {
         return Optional.ofNullable(endTime);
-    }
-
-    @Override
-    public LocalDateTime getStartTime() {
-        throw new RuntimeException("В классе Epic запрещено использовать getStartTime(). " +
-                "Воспользуйтесь getStartTimeOptional");
     }
 
     public Optional<LocalDateTime> getStartTimeOptional() {
@@ -45,11 +39,7 @@ public class Epic extends Task {
 
     @Override
     public Duration getDuration() {
-        if (duration == null) {
-            return Duration.ZERO;
-        } else {
-            return duration;
-        }
+        return Objects.requireNonNullElse(duration, Duration.ZERO);
     }
 
     public void setState(States state) {

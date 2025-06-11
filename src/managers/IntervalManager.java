@@ -35,9 +35,9 @@ public class IntervalManager {
 
     public void occupyIntervals(LocalDateTime startTime, LocalDateTime endTime) throws ManagerSaveException {
         if (!canUseInterval(startTime, endTime)) {
-            throw new ManagerIntervalException("Интервал времени: [" +
-                    startTime.format(dateTimeFormatter) + ", " +
-                    endTime.format(dateTimeFormatter) + ") занят!");
+            String message = String.format("Полуинтервал времени: %s - %s занят!",
+                    startTime.format(dateTimeFormatter), endTime.format(dateTimeFormatter));
+            throw new ManagerIntervalException(message);
         }
         occupyOrRestoreTimeIntervals(startTime, endTime, true);
     }

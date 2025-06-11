@@ -1,6 +1,7 @@
 import common.Managers;
+import exception.LogicalErrorException;
 import exception.ManagerIntervalException;
-import exception.ManagerSaveException;
+import exception.TaskNotFoundException;
 import managers.TaskManager;
 import model.Epic;
 import model.SubTask;
@@ -101,7 +102,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
         @DisplayName("Менеджер корректно добавляет задачу с пустым startDate")
         @Test
-        public void shouldManagerСorrectAddTaskWithNullStartDate() {
+        public void shouldManagerCorrectAddTaskWithNullStartDate() {
             taskId = taskManager.createTask(task);
             task = taskManager.getTaskById(taskId);
             Duration duration1 = Duration.ofDays(3);
@@ -236,7 +237,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
             task = new Task(666, "изменил название", "изменил комментарий", States.DONE,
                     newStartDateTime, newDuration);
 
-            assertThrows(ManagerSaveException.class, () -> {
+            assertThrows(TaskNotFoundException.class, () -> {
                 taskId = taskManager.updateTask(task);
             }, "Обновление ранее несозданной задачи должно приводить к исключению!");
         }
@@ -249,7 +250,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
             task = new Task("изменил название", "изменил комментарий", States.DONE,
                     newStartDateTime, newDuration);
 
-            assertThrows(ManagerSaveException.class, () -> {
+            assertThrows(TaskNotFoundException.class, () -> {
                 taskId = taskManager.updateTask(task);
             }, "Обновление задачи без Id должно приводить к исключению!");
         }
@@ -293,7 +294,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         public void shouldTasksWithSetIdAndGeneratedIdWillNotConflict() {
             Task task1 = new Task(taskId, "Какая-то другая задача", "Потихоньку едет крыша!!!!", States.DONE,
                     task.getStartTime(), task.getDuration());
-            assertThrows(ManagerSaveException.class, () -> {
+            assertThrows(LogicalErrorException.class, () -> {
                 int task1Id = taskManager.createTask(task1);
             }, "Добавление задачи c заданным ID должно приводить к исключению!");
         }
@@ -401,9 +402,10 @@ abstract class TaskManagerTest<T extends TaskManager> {
         @Test
         public void shouldTaskManagerRemoveEpic() {
             taskManager.deleteEpicById(epicId);
-            epic = taskManager.getEpicById(epicId);
 
-            assertNull(epic, "Эпик не удален!");
+            assertThrows(TaskNotFoundException.class, () -> {
+                epic = taskManager.getEpicById(epicId);
+            }, "Эпик не удален!");
         }
 
         @DisplayName("TaskManager действительно обновляет Эпик")
@@ -426,7 +428,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         public void shouldTaskManagerDoesNotUpdateEpicWithoutId() {
             epic = new Epic("изменил название", "изменил комментарий");
 
-            assertThrows(ManagerSaveException.class, () -> {
+            assertThrows(TaskNotFoundException.class, () -> {
                 taskManager.updateEpic(epic);
             }, "Обновление Эпика без ID должно приводить к исключению!");
         }
@@ -436,7 +438,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         public void shouldTaskManagerDoesNotUpdateNotCreatedEpic() {
             epic = new Epic(666, "изменил название", "изменил комментарий");
 
-            assertThrows(ManagerSaveException.class, () -> {
+            assertThrows(TaskNotFoundException.class, () -> {
                 taskManager.updateEpic(epic);
             }, "Обновление ранее несозданного Эпика должно приводить к исключению!");
         }
@@ -446,7 +448,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         public void shouldNotEpicMakeIdOwnSubTask() {
             subTask1 = new SubTask(epicId, "Подзадач", "Комментарий", States.NEW, epicId,
                     LocalDateTime.now(), Duration.ofDays(1));
-            assertThrows(ManagerSaveException.class, () -> {
+            assertThrows(LogicalErrorException.class, () -> {
                 int subTask1Id = taskManager.createSubTask(subTask1);
             }, "Порождение подзадачи с указанным ID должно привести к исключению!");
         }
@@ -894,22 +896,27 @@ abstract class TaskManagerTest<T extends TaskManager> {
         @Test
         public void shouldTaskManagerRemoveSubTask() {
             taskManager.deleteSubTaskById(subTask1Id);
-            subTask1 = taskManager.getSubTaskById(subTask1Id);
-            subTask2 = taskManager.getSubTaskById(subTask2Id);
 
-            assertNull(subTask1, "Подзадача 1 не удалена!");
-            assertNotEquals(null, subTask2, "Ошибочно удалена подзадача2");
+            assertThrows(TaskNotFoundException.class, () -> {
+                        subTask1 = taskManager.getSubTaskById(subTask1Id);
+                    }, "Запрос удаленной задачи должен приводить к исключению TaskNotFoundException"
+            );
+            assertEquals(1, taskManager.getSubTaskList().size(), "Не удалилась задача");
+            assertEquals(subTask2Id, taskManager.getSubTaskList().getFirst().getId(),
+                    "удалилась не та подзадача");
         }
 
         @DisplayName("TaskManager действительно удаляет все подзадачи")
         @Test
         public void shouldTaskManagerRemoveAllSubTask() {
             taskManager.deleteAllSubTasks();
-            subTask1 = taskManager.getSubTaskById(subTask1Id);
-            subTask2 = taskManager.getSubTaskById(subTask2Id);
 
-            assertNull(subTask1, "Подзадача 1 не удалена!");
-            assertNull(subTask2, "Подзадача 2 не  удалена ");
+            assertThrows(TaskNotFoundException.class, () -> {
+                subTask1 = taskManager.getSubTaskById(subTask1Id);
+            }, "Запрос удаленной подзадачи должен приводить к исключению!");
+            assertThrows(TaskNotFoundException.class, () -> {
+                subTask1 = taskManager.getSubTaskById(subTask2Id);
+            }, "Запрос удаленной подзадачи должен приводить к исключению!");
             assertEquals(0, taskManager.getSubTaskList().size(), "Подзадачи не удалены");
         }
 
@@ -959,7 +966,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
             epic1Id = 666;
             subTask1 = new SubTask("Подзадача", "Коммент", States.DONE, epic1Id,
                     startDateTime1, duration1);
-            assertThrows(ManagerSaveException.class, () -> {
+            assertThrows(TaskNotFoundException.class, () -> {
                 int epic1Id = taskManager.createSubTask(subTask1);
             }, "Порождение подзадачи несуществующего Эпика должно приводить к исключению!");
         }
@@ -970,7 +977,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
             subTask1 = new SubTask(subTask1Id, subTask1.getName(), subTask1.getDescription(), subTask1.getState(),
                     subTask1Id, startDateTime1, duration1);
 
-            assertThrows(ManagerSaveException.class, () -> {
+            assertThrows(TaskNotFoundException.class, () -> {
                 taskManager.updateSubTask(subTask1);
             }, "Порождение подзадачи несуществующего Эпика должно приводить к исключению!");
         }

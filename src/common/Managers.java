@@ -7,11 +7,14 @@ import managers.FileBackedTaskManager;
 import managers.IntervalManager;
 import managers.TaskManager;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
 
 public class Managers {
     private static final String fileName = System.getProperty("user.home") + "\\" + "test.csv";
     private static final DateTimeFormatter dateTimeFormatterForIO = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+    private static final Charset DEFAULTCHARSET = StandardCharsets.UTF_8;
 
     public static TaskManager getDefaultTaskManager() {
         return new FileBackedTaskManager(fileName);
@@ -31,5 +34,9 @@ public class Managers {
 
     public static DateTimeFormatter getDefaultDateTimeFormatter() {
         return dateTimeFormatterForIO;
+    }
+
+    public static Charset getDefaultcharset() {
+        return DEFAULTCHARSET;
     }
 }
